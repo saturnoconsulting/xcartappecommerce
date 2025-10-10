@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "645962463593",
+    "project_id": "xcart",
+    "storage_bucket": "xcart.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645962463593:android:cf02793624664844e125f8",
+        "android_client_info": {
+          "package_name": "com.saturnoconsulting.xcart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLDeaU-MHZc9oz6s1UtfLvLhI1QrkBdwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

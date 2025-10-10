@@ -1,0 +1,36 @@
+{
+    "cli": {
+      "version": ">= 0.52.0"
+    },
+    "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+      "development": {
+        "env": {
+          "APP_ENV": "dev",
+          "EXPO_ANDROID_MIN_SDK_VERSION": "26",
+          "EXPO_KOTLIN_VERSION": "1.9.22",
+          "EXPO_KSP_VERSION": "1.0.20"
+        },
+        "developmentClient": true,
+        "distribution": "internal"
+      },
+      "production": {
+        "channel": "prod",
+        "env": {
+          "APP_ENV": "prod",
+          "EXPO_ANDROID_MIN_SDK_VERSION": "26",
+          "EXPO_KOTLIN_VERSION": "1.9.22",
+          "EXPO_KSP_VERSION": "1.0.20"
+        }
+      }
+    }, 
+    "submit": {
+      "production": {}
+    }
+  }
+  
