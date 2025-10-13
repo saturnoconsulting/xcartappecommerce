@@ -52,7 +52,7 @@ export const CartItem = ({ item, refetchCart }) => {
   let image;
   if (item?.product?.image) {
     const imageUrl = item.product.image;
-    image = { uri: imageUrl.includes("http") ? imageUrl : 'https://app.rugbylaquila.com/' + imageUrl };
+    image = { uri: imageUrl.includes("http") ? imageUrl : 'https://app.xcart.ai/' + imageUrl };
   } else {
     image = placeholderImage;
   }

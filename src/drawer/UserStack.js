@@ -4,7 +4,6 @@ import User from '../views/User';
 import UserDetails from '../views/UserDetails';
 import Orders from '../views/Orders';
 import OrderDetails from '../views/OrderDetails';
-import Subscriptions from '../views/Subscriptions';
 import CustomBackButton from '../components/atoms/CustomBackHome';
 import { backgroundcolor } from '../constants/colors';
 import Tickets from '../views/Tickets';
@@ -45,14 +44,6 @@ export default function UserStack() {
         component={OrderDetails}
         options={{
           title: "Dettaglio ordine",
-          headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
-        }}
-      />
-      <Stack.Screen
-        name="Subscriptions"
-        component={Subscriptions}
-        options={{
-          title: "I tuoi abbonamenti",
           headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
         }}
       />

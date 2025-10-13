@@ -8,10 +8,10 @@ import { useSelector } from "react-redux";
 import { GET_USER } from "../store/selectors/userSelector";
 import { primaryColor } from "../constants/colors";
 import Tabs from "./Tabs";
-import VideoMatchLive from "../views/VideoMatchLive";
 import CustomBackButton from "../components/atoms/CustomBackHome";
 import { GET_CART_LENGHT } from "../store/selectors/cartSelector";
 import useNotifications from '../hooks/useNotifications';
+import { logo } from "../constants/images";
 
 const Drawer = createDrawerNavigator();
 
@@ -36,14 +36,6 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                 }>
                     <Icon name="newspaper-outline" size={22} color="white" />
                     <Text style={styles.menuText}>News</Text>
-                </TouchableOpacity>
-
-                  {/* La storia */}
-                <TouchableOpacity style={styles.menuItem} onPress={() =>
-                    navigation.navigate("Tabs", { screen: "Home", params: { screen: "WebViewPage", params: { slug: "storia" } } })
-                }>
-                    <Icon name="document-text-outline" size={22} color="white" />
-                    <Text style={styles.menuText}>La Storia</Text>
                 </TouchableOpacity>
 
                 {/* Squadra con Sottomenu */}
@@ -112,73 +104,7 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                         style={{ marginLeft: 'auto' }}
                     />
                 </TouchableOpacity>
-                {showRankingSubmenu && (
-                    <View style={styles.subMenuContainer}>
-                         <TouchableOpacity
-                            style={styles.subMenuItem}
-                            onPress={() => navigation.navigate("Tabs", {
-                                screen: "Home", params: {
-                                    screen: "WebViewPage",
-                                    params: { slug: "risultati-serie-a" }
-                                }
-                            })}
-                        >
-                            <Text style={styles.subMenuText}>Risultati Serie A</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.subMenuItem}
-                            onPress={() => navigation.navigate("Tabs", {
-                                screen: "Home", params: {
-                                    screen: "WebViewPage",
-                                    params: { slug: "classifica" }
-                                }
-                            })}
-                        >
-                            <Text style={styles.subMenuText}>Classifica Serie A</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.subMenuItem}
-                            onPress={() => navigation.navigate("Tabs", {
-                                screen: "Home", params: {
-                                    screen: "WebViewPage",
-                                    params: { slug: "risultati-serie-c" }
-                                }
-                            })}
-                        >
-                            <Text style={styles.subMenuText}>Risultati Serie C</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.subMenuItem}
-                            onPress={() => navigation.navigate("Tabs", {
-                                screen: "Home", params: {
-                                    screen: "WebViewPage",
-                                    params: { slug: "classifica-cadetta" }
-                                }
-                            })}
-                        >
-                            <Text style={styles.subMenuText}>Classifica Serie C</Text>
-                        </TouchableOpacity>
-                       
-                    </View>
-                )}
-
-                {/* Lo stadio */}
-                <TouchableOpacity style={styles.menuItem} onPress={() =>
-                    navigation.navigate("Tabs", { screen: "Home", params: { screen: "WebViewPage", params: { slug: "stadio" } } })
-                }>
-                    <Icon name="football-outline" size={22} color="white" />
-                    <Text style={styles.menuText}>Lo Stadio</Text>
-                </TouchableOpacity>
-
-                {/* Calendario */}
-                {/*<TouchableOpacity style={styles.menuItem} onPress={() =>
-                    navigation.navigate("Tabs", { screen: "Home", params: { screen: "WebViewPage", params: { slug: "calendario" } } })
-                }>
-                    <Icon name="document-text-outline" size={22} color="white" />
-                    <Text style={styles.menuText}>Calendario</Text>
-                </TouchableOpacity>*/}
-               
-                {/* Sponsor */}
+        
                 <TouchableOpacity style={styles.menuItem} onPress={() =>
                     navigation.navigate("Tabs", { screen: "Home", params: { screen: "Posts", params: { idCat: "5", nameCat: "Sponsor" } } })
                 }>
@@ -232,7 +158,7 @@ const MainDrawer = () => {
                             </View>
                             <View style={styles.headerCenter}>
                                 <TouchableOpacity onPress={() => navigation.navigate("Tabs", { screen: "Home", params: { screen: "Dashboard" } })}>
-                                    <Image source={require('../assets/img/logo-nuovo-header.png')} style={styles.centeredLogo} />
+                                    <Image source={logo} style={styles.centeredLogo} />
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.headerSide}>
@@ -255,7 +181,7 @@ const MainDrawer = () => {
                 })}
             >
                 <Drawer.Screen name="Tabs" component={Tabs} />
-                <Drawer.Screen name="VideoMatchLive" component={VideoMatchLive} />
+              
             </Drawer.Navigator>
 
             {loading && <Loading />}

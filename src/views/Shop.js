@@ -25,10 +25,6 @@ export default function Shop() {
     params,
   });
 
-  // const handleSubs = () => {
-  //      navigation.navigate('SubScriptionsPurchase');
-  //  };
-
 console.log("Categories in Shop:", cats);
   return (
     <ScreenWrapper>

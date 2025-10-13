@@ -21,7 +21,7 @@ const OrderDetails = ({ route }) => {
     const { orderDetails, loading, refetch } = useFetchOrderDetails({ iduser, idorder });
 
     const handlePayment = async () => {
-        await WebBrowser.openBrowserAsync("https://app.rugbylaquila.com/api/v1/checkout/" + orderDetails.idorder);
+        await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + orderDetails.idorder);
     }
 
     const onRefresh = async () => {

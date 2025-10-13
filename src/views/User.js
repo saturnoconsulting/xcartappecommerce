@@ -32,17 +32,6 @@ const User = () => {
                 </TouchableOpacity>
 
                 <View style={styles.separator} />
-                <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
-                    <CustomText style={styles.menuText}>Abbonamenti</CustomText>
-                </TouchableOpacity>
-
-                <View style={styles.separator} />
-
-                <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Tickets')}>
-                    <CustomText style={styles.menuText}>Biglietti</CustomText>
-                </TouchableOpacity> 
-
-                <View style={styles.separator} />
 
                 <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Orders')}>
                     <CustomText style={styles.menuText}>Ordini</CustomText>

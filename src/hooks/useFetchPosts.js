@@ -28,7 +28,7 @@ const useFetchPosts = ({ params }) => {
         description: params?.description
       };
       
-      const response = await axios.get("https://app.rugbylaquila.com/api/cms/v1/posts", {
+      const response = await axios.get("https://app.xcart.ai/api/cms/v1/posts", {
         params: queryParams,
       }, 
     );

@@ -6,10 +6,7 @@ export const registerToken = "registertoken";
 export const signup = "signup";
 export const accountDelete = "account/delete";
 export const recover = "recover";
-export const subscriptions = "subscriptions";
-export const tickets = "tickets";
 
-export const subactive = "subscriptions/active";
  
 export const message = "message";
 

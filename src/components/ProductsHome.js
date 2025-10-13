@@ -15,18 +15,6 @@ import { placeholderImage } from '../constants/images';
 const ProductsHome = ({ products }) => {
    const { navigate } = useNavigation();
    
-  // Filtra biglietti e abbonamenti
-  const tickets = useMemo(() => {
-    return products?.filter(
-      (product) => product.idCategory === '9071b96a-d055-469a-a8ce-93b8c2f07965'
-    );
-  }, [products]);
-
-  const subscriptions = useMemo(() => {
-    return products?.filter(
-      (product) => product.idCategory === '0f0ff9e1-fe69-4f87-9314-e19764ff2692'
-    );
-  }, [products]);
 
   //console.log("ProductsHome tickets", tickets);
   return (
@@ -64,13 +52,13 @@ const ProductsHome = ({ products }) => {
 
      <View style={{ marginBottom: 40 }}>
         <CustomText style={styles.title}>Abbonamenti</CustomText>
-        {subscriptions.length > 0 ? (
+        {products.length > 0 ? (
           <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
         >
-          {subscriptions.map((product) => (
+          {products.map((product) => (
             <TouchableOpacity key={product.externalid} onPress={() => navigate("ProductDetails", { product, sourceScreen: "Dashboard" })}>
               <ImageBackground
                 source={product?.images?.length > 0 ? { uri: product.images[0].imageUrl } : placeholderImage}

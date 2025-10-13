@@ -181,7 +181,7 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
             const response = await checkout(orderData);
            // console.log("orderData", orderData);
            // console.log("response", response);
-            await WebBrowser.openBrowserAsync("https://app.rugbylaquila.com/api/v1/checkout/" + response.data.idorder);
+            await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + response.data.idorder);
             onClose(true);
             if (response?.success || response?.status === 200) {
                 await emptyCart(storedCartId);
