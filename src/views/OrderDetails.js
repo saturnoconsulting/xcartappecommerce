@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { RefreshControl, View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { RefreshControl, View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import useFetchOrderDetails from '../hooks/useFetchOrderDetails';
 import { useSelector } from 'react-redux';
 import { backgroundcolor, primaryColor } from '../constants/colors';
@@ -9,9 +9,10 @@ import CustomText from '../components/atoms/CustomText';
 import formatPrice from '../utils/formatPrice';
 import * as WebBrowser from 'expo-web-browser';
 import { getPaymentLabel, getTextStatus } from '../utils/formatStatus';
-import { orders } from '../constants/endpoints';
-import ScreenWrapper from '../components/layouts/ScreenWrapper';
-
+import { LICENSE } from '../config';
+import ModalComponent from '../components/ModalComponent';
+import { placeholderImage } from '../constants/images';
+import Separator from '../components/atoms/Separator';
 
 const OrderDetails = ({ route }) => {
     const customer = useSelector(GET_USER);
@@ -19,9 +20,10 @@ const OrderDetails = ({ route }) => {
     const iduser = customer?.iduser;
     const [refreshing, setRefreshing] = useState(false);
     const { orderDetails, loading, refetch } = useFetchOrderDetails({ iduser, idorder });
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const handlePayment = async () => {
-        await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + orderDetails.idorder);
+    const handlePayment = async () => { 
+        await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + orderDetails.idorder + '?etoken=' + LICENSE);
     }
 
     const onRefresh = async () => {
@@ -48,17 +50,28 @@ const OrderDetails = ({ route }) => {
     }
 
     if (!orderDetails) {
-        return <CustomText style={styles.text}>Ordine non trovato.</CustomText>;
+        return <CustomText style={styles.textNotFound}>Ordine non trovato.</CustomText>;
     }
 
-    const { name, surname, total,discount,coupon, status, shippingprice, payment, details } = orderDetails;
+    const { name, surname, total, discount, coupon, status, shippingprice, payment, details } = orderDetails;
+
+
+    console.log("details", details);
 
     const renderProductItem = ({ item }) => (
+        <>
         <View style={styles.productItem}>
+            <Image
+                source={ item.image ? { uri: item.image } : placeholderImage }
+                style={styles.productImage}
+                resizeMode="cover"
+            />
             <CustomText style={styles.productName}>{item.productname}</CustomText>
             <CustomText style={styles.text}>Quantità: {item.qnt}</CustomText>
             <CustomText style={styles.text}>Prezzo unitario: {formatPrice(item.unitprice)}</CustomText>
         </View>
+       <Separator/>
+        </>
     );
 
     const renderHeader = () => (
@@ -86,72 +99,100 @@ const OrderDetails = ({ route }) => {
                     <CustomText style={styles.bold}>Data ordine: </CustomText>
                     <CustomText style={styles.text}>{formatDate(orderDetails.created_at)}</CustomText>
                 </CustomText>
-                 <CustomText style={styles.text}>
-                    <CustomText style={styles.bold}>Stato Ordine: </CustomText> 
+                <CustomText style={styles.text}>
+                    <CustomText style={styles.bold}>Stato Ordine: </CustomText>
                     <CustomText style={styles.textStatus}>{getTextStatus(status)} </CustomText>
-                 </CustomText>
-                 <CustomText style={styles.text}>
-                    <CustomText style={styles.bold}>Coupon utilizzato: </CustomText> 
+                </CustomText>
+                <CustomText style={styles.text}>
+                    <CustomText style={styles.bold}>Coupon utilizzato: </CustomText>
                     <CustomText style={styles.textStatus}>{orderDetails.coupon?.couponcode || '-'} </CustomText>
-                 </CustomText>
-                 {/* TODO: VALORE COUPON */}
+                </CustomText>
             </View>
             {/*<View style={styles.section}>
                 <CustomText style={styles.text}>
                 </CustomText>
             </View>*/}
+            <Separator/>
             <CustomText style={styles.title}>Indirizzo di spedizione:</CustomText>
             <View style={styles.section}>
-                 <CustomText style={styles.text}>
+                <CustomText style={styles.text}>
                     <CustomText style={styles.bold}>Indirizzo: </CustomText>
                     <CustomText style={styles.text}>{orderDetails.address}, {orderDetails.cap}, {orderDetails.city}, {orderDetails.country}</CustomText>
                 </CustomText>
-                 <CustomText style={styles.text}>
+                <CustomText style={styles.text}>
                     <CustomText style={styles.bold}>Metodo di spedizione: </CustomText>
                     <CustomText style={styles.text}>{orderDetails.shippingtype}</CustomText>
                 </CustomText>
             </View>
+             <Separator/>
             <CustomText style={styles.title}>Prodotti</CustomText>
         </View>
     );
 
     return (
-        <ScreenWrapper style={{ flex: 1}}> 
-        <FlatList
-            style={styles.container}
-            data={details}
-            keyExtractor={(item) => item.idorder_detail.toString()}
-            renderItem={renderProductItem}
-            ListHeaderComponent={renderHeader}
-            ListFooterComponent={
-                <>
-                    <View style={styles.totalContainer}>
-                        {coupon && <CustomText style={[styles.totalText,styles.discountText]}>Sconto: {formatPrice(discount)}</CustomText>}
-                        <CustomText style={styles.totalText}>Totale: {formatPrice(total)}</CustomText>
-                    </View>
-                    {orderDetails.status === "pending" && (
-                        <TouchableOpacity
-                            onPress={handlePayment}
-                            style={styles.payNow}
-                        >
-                            <CustomText style={styles.totalText}>Paga Ora</CustomText>
-                        </TouchableOpacity>
-                    )
+        <>
+            <FlatList
+                style={styles.container}
+                data={details}
+                keyExtractor={(item) => item.idorder_detail.toString()}
+                renderItem={renderProductItem}
+                ListHeaderComponent={renderHeader}
+                ListFooterComponent={
+                    <>
+                        <View style={styles.totalContainer}>
+                            {coupon && <CustomText style={[styles.totalText, styles.discountText]}>Sconto: {formatPrice(discount)}</CustomText>}
+                            <CustomText style={styles.totalText}>Totale: {formatPrice(total)}</CustomText>
+                        </View>
+                        {orderDetails.status === "pending" && (
+                            <TouchableOpacity
+                                onPress={handlePayment}
+                                style={styles.payNow}
+                            >
+                                <CustomText style={styles.totalText}>Paga Ora</CustomText>
+                            </TouchableOpacity>
+                        )
+                        }
+                        {orderDetails.status === "completed" && (
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(true)}
+                                style={styles.payNow}
+                            >
+                                <CustomText style={styles.totalText}>Effettua reso</CustomText>
+                            </TouchableOpacity>
+                        )
+                        }
+                    </>
                 }
-                </>
-            }
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
-        </ScreenWrapper>
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            />
+            {modalVisible && orderDetails && (
+                <ModalComponent
+                    onClose={() => setModalVisible(false)}
+                    fromOrderDetails={true}
+                    modal={modalVisible}
+                    orderDetails={orderDetails}
+                />
+            )}
+
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    discountText:{
+    productImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 6,
+        marginRight: 10,
+        backgroundColor: '#eee',
         marginBottom: 10,
-        fontSize:15
     },
-    payNow:{
+
+    discountText: {
+        marginBottom: 10,
+        fontSize: 15
+    },
+    payNow: {
         backgroundColor: primaryColor,
         marginTop: 20,
         padding: 15,
@@ -165,7 +206,7 @@ const styles = StyleSheet.create({
     },
     section: {
         backgroundColor: 'white',
-        padding: 15,
+        padding: 1,
         borderRadius: 8,
         marginBottom: 5,
         //elevation: 2,
@@ -177,6 +218,13 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         color: '#333',
     },
+    textNotFound: {
+        fontSize: 16,
+        color: '#555',
+        alignContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+    },
     text: {
         marginTop: 5,
         marginBottom: 5,
@@ -187,7 +235,7 @@ const styles = StyleSheet.create({
     },
     productItem: {
         backgroundColor: '#fff',
-        padding: 15,
+        padding: 1,
         marginVertical: 5,
         borderRadius: 8,
         //elevation: 2,

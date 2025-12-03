@@ -1,54 +1,134 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Loading from '../components/Loading';
 import CustomText from '../components/atoms/CustomText';
+import { logout } from '../api/user';
+import { backgroundcolor, primaryColor } from '../constants/colors';
+import Separator from '../components/atoms/Separator';
 
 const User = () => {
-    const navigation = useNavigation();
-    const [loading, setLoading] = React.useState(false);
+  const navigation = useNavigation();
+  const [loading, setLoading] = React.useState(false);
 
-    const goToHomeStack = async (screenName) => {
-        try {
-            setLoading(true);
-            const tabNavigation = navigation.getParent();
-            tabNavigation.navigate('User');
-            navigation.navigate(screenName);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const goToHomeStack = async (screenName) => {
+    try {
+      setLoading(true);
+      const tabNavigation = navigation.getParent();
+      //tabNavigation.navigate('User');
+      navigation.navigate(screenName);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <>
-            {loading && (
-                <Loading />
-            )}
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await logout();
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } catch (err) {
+      console.error('Errore durante il logout:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <CustomText style={styles.titleSection}>Area Utente</CustomText>
-            <View style={styles.menuContainer}>
-                <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('UserDetails')}>
-                    <CustomText style={styles.menuText}>Profilo</CustomText>
-                </TouchableOpacity>
+  return (
+    <View style={{ flex: 1, backgroundColor: backgroundcolor }}>
+      {loading && <Loading />}
 
-                <View style={styles.separator} />
+      <CustomText style={styles.titleSection}>Area Utente</CustomText>
 
-                <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Orders')}>
-                    <CustomText style={styles.menuText}>Ordini</CustomText>
-                </TouchableOpacity>
+      <View style={styles.menuContainer}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => goToHomeStack('UserDetailsRecap')}
+        >
+          <CustomText style={styles.menuText}>Profilo</CustomText>
+        </TouchableOpacity>
 
-                <View style={styles.separator} />
-            </View>
-        </>
-    );
+        <Separator />
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => goToHomeStack('Favorite')}
+        >
+          <CustomText style={styles.menuText}>Preferiti</CustomText>
+        </TouchableOpacity>
+
+        <Separator />
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => goToHomeStack('Orders')}
+        >
+          <CustomText style={styles.menuText}>Ordini</CustomText>
+        </TouchableOpacity>
+
+        <Separator />
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => goToHomeStack('Returns')}
+        >
+          <CustomText style={styles.menuText}>Resi</CustomText>
+
+        </TouchableOpacity>
+
+        <Separator />
+
+        <View style={styles.logoutSection}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Icon name="log-out-outline" size={22} color="white" />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    separator: { height: 1, backgroundColor: '#ccc', marginBottom: 20 },
-    titleSection: { color: 'black', fontSize: 20, fontWeight: 'bold', marginTop: 20, textAlign: 'center' },
-    menuContainer: { marginTop: 30, paddingHorizontal: 20 },
-    menuItem: { backgroundColor: '#f0f0f0', padding: 16, borderRadius: 8, marginBottom: 12 },
-    menuText: { fontSize: 16, color: '#333' }
+  titleSection: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  menuContainer: {
+    marginTop: 30,
+    paddingHorizontal: 20,
+    backgroundColor: backgroundcolor,
+  },
+  menuItem: {
+    backgroundColor: backgroundcolor,
+    padding: 16,
+    borderRadius: 8,
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  logoutSection: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: primaryColor,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 16,
+    marginLeft: 10,
+  },
 });
 
 export default User;

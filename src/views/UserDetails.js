@@ -171,7 +171,6 @@ export default function UserDetails({ route }) {
       setErrorMessage(validationError);
       return;
     }
-
     try {
       setSaving(true);
       setErrorMessage(null);
@@ -202,12 +201,12 @@ export default function UserDetails({ route }) {
   return (
     <>
       {isBusy && <Loading />}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 150}
-      >
-        <View style={styles.container}>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 150}
+        >
           <ScrollView
             contentContainerStyle={{ paddingBottom: 30 }}
             refreshControl={
@@ -298,8 +297,8 @@ export default function UserDetails({ route }) {
               <Text style={styles.deleteButtonText}>Elimina account</Text>
             </TouchableOpacity>
           </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </>
   );
 }
@@ -318,7 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: backgroundcolor,
-    marginBottom: 50,
+    marginBottom: 0,
   },
   label: {
     fontSize: 14,
@@ -329,7 +328,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   input: {
-    height: 40,
+    height: 45,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 6,

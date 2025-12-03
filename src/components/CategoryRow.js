@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         borderColor: "lightgrey",
         borderWidth: 0.4,
         elevation: 3,
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffffff',
         borderRadius: 5,
     },
     imageBackground: {
@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
         height: '100%',
         resizeMode: 'cover',
     },
-
     overlay: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0, 0, 0, 0.4)',

@@ -8,21 +8,21 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import CheckoutWeb from "./CheckoutWeb";
-import { primaryColor } from "../constants/colors";
 import { GET_USER } from "../store/selectors/userSelector";
-import CustomText from "./atoms/CustomText";
+import ReturnsModal from "./ReturnsModal";
 
 export const ModalComponent = ({
   couponType,
   couponCode,
-  paymentMethod,
   modal,
   onClose,
   cartdata,
   total,
   couponAmount,
   refetchCart,
-  resetCart
+  resetCart,
+  fromOrderDetails,
+  orderDetails
 }) => {
   const customer = useSelector(GET_USER);
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,22 +33,29 @@ export const ModalComponent = ({
 
   const handleClose = () => {
     setModalVisible(false);
-    if (onClose) onClose(); // Chiusura normale, non post-checkout
+    if (onClose) onClose();
   };
 
-  const renderFormContent = () => (
+const renderFormContent = () => (
+  fromOrderDetails ? (
+    <ReturnsModal
+     onClose={onClose} 
+     orderDetails={orderDetails}
+     />
+  ) : (
     <CheckoutWeb
       resetCart={resetCart}
       couponAmount={couponAmount}
       total={total}
-      onClose={onClose} // onClose(true) viene chiamato da CheckoutWeb in caso di successo
+      onClose={onClose}  
       couponCode={couponCode}
       customer={customer}
       cartdata={cartdata}
       refetchCart={refetchCart}
       couponType={couponType}
     />
-  );
+  )
+);
 
   return (
     <Modal
@@ -60,9 +67,8 @@ export const ModalComponent = ({
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Icon name="close" size={24} color="black" />
+            <Icon name="close" size={35} color="black" />
           </TouchableOpacity>
-          <CustomText style={styles.modalTitle}>Checkout</CustomText>
           {renderFormContent()}
         </View>
       </View>
@@ -75,7 +81,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
-    padding: 5,
+    margin: 10,
   },
   modalContainer: {
     flex: 1,

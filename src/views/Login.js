@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Switch, Image, TouchableOpacity, StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Keyboard, ImageBackground } from "react-native";
-import { Button } from "react-native-paper";
+
 import { login } from "../api/user";
 import Loading from "../components/Loading";
 import { useDispatch } from "react-redux";
@@ -15,6 +15,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import CustomText from "../components/atoms/CustomText";
 import { logo } from "../constants/images";
+import Button from "../components/atoms/Button";
 
 
 const Login = ({ navigation }) => {
@@ -107,7 +108,7 @@ const Login = ({ navigation }) => {
       };
 
       const response = await login(body);
-      //console.log("response", response);
+      console.log("response", response);
 
       if (response?.token) {
         // SALVI SOLO QUI
@@ -119,6 +120,7 @@ const Login = ({ navigation }) => {
         console.log("cartID login", cartID)
         if (response.idcart != null) {
           await AsyncStorage.setItem("cartId", response.idcart);
+         
         }
         dispatch(setUser(response.user));
         if (!isAuto) {
@@ -179,9 +181,9 @@ const Login = ({ navigation }) => {
                   <Icon name={showPassword ? 'eye-off' : 'eye'} size={22} color="black" />
                 </TouchableOpacity>
               </View>
-              <Button mode="contained" onPress={() => handleLogin()} style={styles.button} disabled={loading}>
-                Accedi
-              </Button>
+              
+              <Button title={"Accedi"} onPress={() => handleLogin()} style={styles.button} disabled={loading} />
+  
               <TouchableOpacity onPress={() => navigation.navigate("Recover")}>
                 <Text style={styles.text}>Non ricordi la password? Recuperala</Text>
               </TouchableOpacity>
@@ -215,8 +217,6 @@ const Login = ({ navigation }) => {
                   Accedi con Face ID
                 </Button>
               )}
-
-
             </View>
             {loading && <Loading />}
           </View>
@@ -293,7 +293,10 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    paddingVertical: 10,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    //paddingVertical: 10,
     borderRadius: 8,
     backgroundColor: primaryColor,
     borderWidth: 0.3,

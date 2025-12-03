@@ -46,7 +46,6 @@ const Orders = ({ navigation }) => {
   return (
     <>
       {loading && orders.length === 0 && <Loading />}
-      <ScreenWrapper>
         <View style={styles.container}>
           {orders.length > 0 ? (
             <>
@@ -97,15 +96,11 @@ const Orders = ({ navigation }) => {
             </ScrollView>
           )}
         </View>
-      </ScreenWrapper>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  orderStatusText: {
-
-  },
   emptyOrders: {
     textAlign: 'center',
   },
@@ -133,9 +128,11 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   orderItem: {
+    borderBlockColor: '#ddd',
+    borderBottomWidth: 1,
     backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 10,
+    paddingTop: 15,
+    paddingBottom: 15,
     borderRadius: 8,
     elevation: 1,
   },

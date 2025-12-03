@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef } from "react";
-import axios from "axios";
+import { api } from "../services/api";
+import * as endpoints from "../constants/endpoints";
 
 const useFetchPosts = ({ params }) => {
   const [posts, setPosts] = useState([]);
@@ -28,7 +29,8 @@ const useFetchPosts = ({ params }) => {
         description: params?.description
       };
       
-      const response = await axios.get("https://app.xcart.ai/api/cms/v1/posts", {
+      console.log("Fetching posts with params:", queryParams);
+      const response = await api.get("https://app.xcart.ai/api/cms/v1/posts", {
         params: queryParams,
       }, 
     );

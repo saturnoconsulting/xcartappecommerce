@@ -1,137 +1,168 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  ImageBackground,
+  FlatList,
+  Image,
+  Dimensions,
 } from 'react-native';
 import formatPrice from '../utils/formatPrice';
 import { useNavigation } from '@react-navigation/native';
 import CustomText from './atoms/CustomText';
 import { placeholderImage } from '../constants/images';
+import { useSelector, useDispatch } from 'react-redux';
+import { isFavorite, selectFavorites } from '../store/selectors/favoriteSelector';
+import { addFavorite, removeFavorite } from '../store/actions/favoriteActions';
+import { primaryColor } from '../constants/colors';
+import { getProductImage } from '../utils/images';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 45) / 2;
 
 const ProductsHome = ({ products }) => {
-   const { navigate } = useNavigation();
-   
+  const { navigate } = useNavigation();
+  const dispatch = useDispatch();
 
-  //console.log("ProductsHome tickets", tickets);
+  // prendiamo tutti i preferiti una sola volta
+  const favorites = useSelector(selectFavorites);
+
+  const toggleFavorite = (product) => {
+    const fav = favorites.includes(product.externalid);
+    if (fav) {
+      dispatch(removeFavorite(product.externalid));
+    } else {
+      dispatch(addFavorite(product.externalid));
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    const fav = favorites.includes(item.externalid);
+
+    //console.log("item", item)
+
+    return (
+      <TouchableOpacity
+        key={item.externalid}
+        onPress={() =>
+          navigate('ProductDetails', {
+            product: item,
+            sourceScreen: 'Dashboard',
+          })
+        }
+        style={styles.card}
+        activeOpacity={0.9}
+      >
+        {/* Pulsante preferito */}
+        <TouchableOpacity
+          onPress={() => toggleFavorite(item)}
+          style={styles.heartButton}
+        >
+          <CustomText style={[styles.heartIcon, fav && styles.heartActive]}>
+            {fav ? '❤️' : '🤍'}
+          </CustomText>
+        </TouchableOpacity>
+        {/* Immagine prodotto */}
+        <Image
+          source={getProductImage(item)}
+          style={styles.image}
+          resizeMode="cover"
+        />
+
+
+        {/* Info prodotto */}
+        <View style={styles.infoContainer}>
+          <CustomText numberOfLines={2} style={styles.name}>
+            {item.description || item.name}
+          </CustomText>
+          <CustomText style={styles.price}>
+            {formatPrice(item.price)}
+          </CustomText>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <>
-      <View style={{ marginTop: 40, marginBottom: 20 }}>
-        <CustomText style={styles.title}>Biglietteria</CustomText>
-        {tickets.length > 0 ? (  
-          <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
-        >
-          {tickets.map((product) => (
-            <TouchableOpacity key={product.externalid} onPress={() => navigate("ProductDetails", { product, sourceScreen: "Dashboard" })}>
-              <ImageBackground
-                source={product?.images?.length > 0 ? { uri: product.images[0].imageUrl } : placeholderImage}
-                style={styles.box}
-                imageStyle={{ borderRadius: 8 }}
-              >
-                <View style={styles.textContainer}>
-                  <CustomText style={styles.boxText}>{product.description}</CustomText>
-                  </View>
-                  <View style={styles.textPriceContainer}>
-                  <CustomText style={styles.priceText}>{formatPrice(product.price)}</CustomText>
-                  <CustomText style={styles.stocksText}>{!product.stock ? 'Esaurito' : ''}</CustomText>
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>) : (
-          <CustomText style={{ marginLeft: 20, color: 'black' }}>Nessun biglietto disponibile</CustomText>
-        )}
-    
-      </View>
-
-     <View style={{ marginBottom: 40 }}>
-        <CustomText style={styles.title}>Abbonamenti</CustomText>
-        {products.length > 0 ? (
-          <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
-        >
-          {products.map((product) => (
-            <TouchableOpacity key={product.externalid} onPress={() => navigate("ProductDetails", { product, sourceScreen: "Dashboard" })}>
-              <ImageBackground
-                source={product?.images?.length > 0 ? { uri: product.images[0].imageUrl } : placeholderImage}
-                style={styles.box}
-                imageStyle={{ borderRadius: 8 }}
-              >
-                <View style={styles.textContainer}>
-                  <CustomText style={styles.boxText}>{product.description}</CustomText>
-                  </View>
-                  <View style={styles.textPriceContainer}>
-                  <CustomText style={styles.priceText}>{formatPrice(product.price)}</CustomText>
-                  <CustomText style={[styles.stocksText]}>{!product.stock ? 'Esaurito' : ''}</CustomText>
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>):(
-          <CustomText style={{ marginLeft: 20, color: 'black' }}>Nessun abbonamento disponibile</CustomText>
-        )}
-      </View>
-    </>
+    <View style={styles.container}>
+      <CustomText style={styles.title}>Prodotti in evidenza</CustomText>
+      {products.length > 0 ? (
+        <FlatList
+          data={products}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.externalid.toString()}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: 'space-around' }}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            paddingTop: 10,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <CustomText style={{ marginLeft: 20, color: 'black' }}>
+          Nessun prodotto presente al momento
+        </CustomText>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  stocksText: {
-    color: '#fff',
-    fontSize: 14,
-   //fontWeight: 'bold',
-  },
-  textPriceContainer:{ //#1a6941
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgb(26, 105, 66)',
-    padding: 4,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+  container: {
+    marginBottom: 10,
+    marginTop: 40,
+    backgroundColor: 'white',
   },
   title: {
     color: 'black',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     marginTop: 10,
-    marginLeft: 20,
-    paddingVertical: 10
+    marginLeft: 15,
+    marginBottom: 20,
   },
-  scrollContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 5,
+    width: CARD_WIDTH,
+    marginBottom: 20,
+    borderWidth: 0.7,
+    borderColor: '#e0e0e0ff',
   },
-  box: {
-    width: 170,
-    height: 215,
-    marginRight: 10,
-    justifyContent: 'flex-end',
+  heartButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
   },
-  textContainer: {
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    padding: 8,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+  heartIcon: {
+    fontSize: 22,
   },
-  boxText: {
-    color: '#fff',
+  heartActive: {
+    color: 'red',
+  },
+  image: {
+    width: '100%',
+    height: 160,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+  },
+  infoContainer: {
+    padding: 10,
+    alignItems: 'flex-start',
+  },
+  name: {
+    fontWeight: '600',
+    color: '#000',
     fontSize: 14,
-    //fontWeight: 'bold',
+    textAlign: 'left',
+    marginBottom: 4,
   },
-  priceText: {
-    //textAlign:"right",
-   // marginTop: 1,
-    color: '#fff',
+  price: {
+    color: primaryColor,
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

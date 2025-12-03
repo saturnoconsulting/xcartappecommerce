@@ -30,7 +30,7 @@ const NewsHome = ({ styleCards,styleTitle,listPosts, loadingPosts, refreshPosts,
 const styles = StyleSheet.create({
   newsSection: {
     paddingBottom: 0,
-    marginTop:30
+    marginTop:20
   },
 });
 

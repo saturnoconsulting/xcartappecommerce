@@ -7,30 +7,28 @@ import Loading from '../components/Loading';
 import { backgroundcolor, primaryColor } from '../constants/colors';
 import useCategories from '../hooks/useCategories';
 import CategoryRow from '../components/CategoryRow';
-import ScreenWrapper from '../components/layouts/ScreenWrapper';
 import CustomText from '../components/atoms/CustomText';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Shop() {
   const [loading, setLoading] = useState(false);
   const [params, setParams] = useState({});
-  const navigation = useNavigation();
 
   const {
     cats,
     loading: loadingCategories,
     refreshCategories,
   } = useCategories({
-    ids: null,
     params,
   });
 
-console.log("Categories in Shop:", cats);
   return (
-    <ScreenWrapper>
-      {loading && <Loading />}
-      <View style={styles.productSection}>
+    <>
+      <View style={styles.container}>
+        {loading && <Loading />}
+        <CustomText style={[styles.title, { backgroundColor: backgroundcolor }]}>Shop</CustomText>
         <FlatList
+          style={{ backgroundColor: backgroundcolor }}
           data={cats}
           keyExtractor={(item) => item.externalid.toString()}
           renderItem={({ item }) => (
@@ -48,14 +46,19 @@ console.log("Categories in Shop:", cats);
         {/*} <TouchableOpacity style={styles.subscriptionButton} onPress={handleSubs}>
   <CustomText style={styles.subscriptionButtonText}>Abbonamenti</CustomText>
 </TouchableOpacity>*/}
-
       </View>
-
-    </ScreenWrapper>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginTop: 20,
+    marginBottom: 20,
+    marginLeft: 15,
+  },
   subscriptionButton: {
     backgroundColor: primaryColor,
     paddingVertical: 12,
@@ -75,7 +78,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-
   productSection: {
     flex: 1,
     backgroundColor: backgroundcolor,
@@ -151,5 +153,9 @@ const styles = StyleSheet.create({
   },
   buttonModal: {
     marginBottom: 20,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: backgroundcolor,
   },
 });

@@ -11,7 +11,6 @@ import { useRoute } from '@react-navigation/native';
 import HTMLRender from "react-native-render-html";
 import { tagsStyles } from '../constants/tagstyle';
 import CustomText from '../components/atoms/CustomText';
-import ScreenWrapper from '../components/layouts/ScreenWrapper';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
 const PostsDetails = () => {
@@ -21,7 +20,6 @@ const PostsDetails = () => {
   const [loadingImage, setLoadingImage] = useState(true);
 
   return (
-    <ScreenWrapper>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           {loadingImage && (
@@ -52,7 +50,6 @@ const PostsDetails = () => {
           />
         </View>
       </ScrollView>
-    </ScreenWrapper>
   );
 };
 

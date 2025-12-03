@@ -1,8 +1,5 @@
-//import { etoken } from "../constants/keys";
-import { api, isLoggingOut } from "../services/api";
+import { api } from "../services/api";
 import * as endpoints from "../constants/endpoints";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { idsalespoint, license } from "../constants/licence";
 
 // Funzione per ottenere il profilo utente
 export const getOrders = async (params) => {
@@ -50,7 +47,7 @@ export const update = async (updatedData) => {
 export const checkout = async (body) => {
     console.log("checkout", body);
     try {
-        const url = `${endpoints.checkout}?idsalespoint=${idsalespoint}`;
+        const url = `${endpoints.checkout}`;
         const response = await api.post(url, body);
         console.log("checkout response", response.data);
         return response;

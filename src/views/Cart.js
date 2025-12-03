@@ -24,7 +24,6 @@ import { useDispatch } from 'react-redux';
 import { setCartLength } from '../store/actions/cartActions';
 import useFetchMessage from '../hooks/useFetchMessage';
 
-
 const Cart = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -40,7 +39,7 @@ const Cart = () => {
     // Usa hook che già gestisce AsyncStorage per cartId
     const { cartData, refetch, loading, refreshing, resetCart } = useCart();
     const { message } = useFetchMessage();
- 
+
     useEffect(() => {
         if (cartData?.totals?.total && !couponAmount) {
             setTotal(cartData.totals.total);
@@ -59,13 +58,12 @@ const Cart = () => {
         }
     }, [cartData?.lineItems]);
 
-    
+
     useFocusEffect(
         useCallback(() => {
             refetch(); // forza sempre il caricamento quando entri
         }, [])
     );
-
 
     useFocusEffect(
         useCallback(() => {
@@ -74,7 +72,6 @@ const Cart = () => {
             }
         }, [cartData?.externalid])
     );
-
 
     const onRefresh = async () => {
         setRefreshingEmpty(true);
@@ -135,22 +132,22 @@ const Cart = () => {
             </View>
         );
     }
-
+    
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-
             {cartData?.lineItems?.length > 0 ? (
                 <View style={styles.container}>
+                    <CustomText style={{ fontSize: 22, fontWeight: '600', marginBottom: 20, marginTop: 10, marginLeft: 10, alignSelf: 'left' }}>Il tuo carrello</CustomText>
                     <FlatList
                         onRefresh={refetch}
                         refreshing={refreshing}
                         data={cartData?.lineItems}
                         keyExtractor={(item) => item.idProduct.toString()}
                         renderItem={({ item }) => (
-                            <CartItem item={item} refetchCart={refetch} />
+                            <CartItem item={item} refetchCart={refetch} qty={item.qnt} />
                         )}
                     />
                     <View style={[styles.totalContainer, couponAmount ? styles.totalContainerWithCoupon : styles.totalContainerFull]}>
@@ -159,12 +156,12 @@ const Cart = () => {
                                 placeholder="Codice sconto"
                                 value={coupon}
                                 onChangeText={setCoupon}
-                                style={styles.searchInput}
+                                style={couponAmount ? styles.searchInputWithCoupon  : styles.searchInput}
                             />
                             <Button
                                 title="Applica"
                                 onPress={handleCoupon}
-                                style={[styles.buttonCoupon, couponAmount ? styles.buttonCouponWithReset : styles.buttonCouponWithoutReset]}
+                                style={[styles.buttonCoupon, couponAmount ? styles.buttonCouponWithReset : '']}
                             />
                             {couponAmount && (
                                 <Button
@@ -174,7 +171,9 @@ const Cart = () => {
                                 />
                             )}
                         </View>
-                        <CustomText style={styles.totalText}>Totale: {formatCartPrice(total)}</CustomText>
+                        <CustomText style={styles.totalText}>  
+                            Totale: {isNaN(Number(total)) ? total : formatCartPrice(total)}
+                        </CustomText>
                         <View style={styles.buttonsContainer}>
                             <Button title="Checkout" onPress={() => setModalVisible(true)} style={styles.button} />
                         </View>
@@ -182,11 +181,11 @@ const Cart = () => {
                 </View>
             ) : (
                 <ScrollView
-                    contentContainerStyle={styles.container}
+                    contentContainerStyle={styles.emptyContainer}
                     refreshControl={<RefreshControl refreshing={refreshingEmpty} onRefresh={onRefresh} />}
                 >
-                    <CustomText style={styles.emptyText}>Il carrello è vuoto.</CustomText>
-                    <View style={styles.buttonsContainer}>
+                    <View style={styles.emptyContent}>
+                        <CustomText style={styles.emptyText}>Il carrello è vuoto</CustomText>
                         <Button
                             title="Raggiungi il negozio"
                             onPress={() => {
@@ -195,7 +194,7 @@ const Cart = () => {
                                     drawerNavigation.navigate('Tabs', { screen: 'Shop' });
                                 }
                             }}
-                            style={styles.button}
+                            style={styles.emptyButton}
                         />
                     </View>
                 </ScrollView>
@@ -217,13 +216,14 @@ const Cart = () => {
 };
 
 const styles = StyleSheet.create({
-    containerMessage:{
-        marginHorizontal:10,
-        marginVertical:50,
+    containerMessage: {
+        marginHorizontal: 10,
+        marginVertical: 50,
     },
     buttonCouponWithReset: {
         borderBottomRightRadius: 0,
         borderTopRightRadius: 0,
+        width: '28%',
     },
     buttonCoupon: {
         marginTop: 0,
@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 0,
     },
     buttonResetCoupon: {
+        width: '23%',
         marginLeft: 0,
         backgroundColor: 'red',
         borderTopLeftRadius: 0,
@@ -238,7 +239,20 @@ const styles = StyleSheet.create({
     },
     couponContainer: {
         flexDirection: 'row',
-        padding: 35,
+        paddingBottom: 10,
+        paddingTop: 25,
+        paddingHorizontal: 35,
+    },
+    searchInputWithCoupon: {
+        width: '80%',
+        height: 50,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingLeft: 10,
+        marginBottom: 12,
+        borderBottomRightRadius: 0,
+        borderTopRightRadius: 0,
     },
     searchInput: {
         width: '100%',
@@ -252,44 +266,61 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 0,
     },
     button: {
-        marginTop: 30,
         width: '100%',
     },
     buttonsContainer: {
-        marginBottom: 70,
+        marginBottom: 5,
+        marginTop: 15,
         width: '100%',
     },
     container: {
         flex: 1,
-        padding: 15,
+        paddingTop: 10,
+        paddingBottom: 6,
+        paddingLeft: 10,
+        paddingRight: 10,
         backgroundColor: backgroundcolor,
     },
     totalContainerFull: {
         width: '100%',
     },
     totalContainerWithCoupon: {
-        width: '89%',
-        marginLeft: 20,
-        marginRight: 20,
+        width: '97%',
+        marginHorizontal: '2%',
     },
     totalContainer: {
-        paddingVertical: 5,
+        paddingVertical: 0,
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: '#ddd',
-        marginTop: 5,
+        marginTop: 0,
     },
     totalText: {
-        marginTop: 5,
+        marginBottom: 6,
         fontSize: 20,
         fontWeight: 'bold',
     },
+    emptyContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: backgroundcolor,
+        padding: 20,
+    },
+    emptyContent: {
+        alignItems: 'center',
+    },
     emptyText: {
         textAlign: 'center',
-        fontSize: 16,
-        color: '#888',
-        marginTop: 20,
+        fontSize: 18,
+        color: '#555',
+        marginBottom: 20,
+        fontWeight: '600',
     },
+    emptyButton: {
+        width: 200,
+    },
+
 });
 
 export default Cart;

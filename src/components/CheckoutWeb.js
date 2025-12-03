@@ -21,12 +21,14 @@ import * as WebBrowser from 'expo-web-browser';
 import CustomText from '../components/atoms/CustomText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenWrapper from './layouts/ScreenWrapper';
+import { LICENSE } from '../config';
+import useFetchProfile from '../hooks/useFetchProfile';
 
 const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, total, couponAmount, refetchCart, resetCart }) => {
     const dispatch = useDispatch()
     const navigation = useNavigation();
     const [step, setStep] = useState(1);
-    const totalSteps = 5;
+    const totalSteps = 4;
     const [isSelectedShipping, setIsSelectedShipping] = useState(false);
     const [isSelectedPayment, setIsSelectedPayment] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -36,39 +38,21 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
     const [shippingType, setShippingType] = useState("");
     const [paymentType, setPaymentType] = useState();
     const [openTapToPayDetails, setOpenTapToPayDetails] = useState(false);
-    const [checkoutButton, setCheckoutButton] = useState(false);
+    const [checkoutButton, setCheckoutButton] = useState(true);
     const [checkoutResp, setCheckoutResp] = useState(null);
     //const cartId = useSelector(GET_CARTID);
 
+    const [finalTotalNew, setFinalTotalNew] = useState(0);
+
+    const {
+        customerDetails,
+        refetch,
+        loading: loadingProfile,
+    } = useFetchProfile({ iduser: customer.iduser });
+
     const [storedCartId, setStoredCartId] = useState(null);
     const [shouldFetchCart, setShouldFetchCart] = useState(false);
-
-    const idcategorySubs = "0f0ff9e1-fe69-4f87-9314-e19764ff2692";
-    const idcategoryTickets = "9071b96a-d055-469a-a8ce-93b8c2f07965";
-
-    useEffect(() => {
-        const getCartId = async () => {
-            const id = await AsyncStorage.getItem('cartId');
-            //console.log('Cart ID from AsyncStorage:', id);
-            if (id && id !== 'null' && id !== '') {
-                setStoredCartId(id);
-                setShouldFetchCart(true);
-            }
-        };
-        getCartId();
-    }, []);
-
-    //console.log("countries",countries)
-
-    useEffect(() => {
-        if (storedCartId) {
-            setOrderData(prev => ({
-                ...prev,
-                idcart: storedCartId
-            }));
-        }
-    }, [storedCartId]);
-
+    const [flagBilling, setFlagBilling] = useState(false);
 
     const [orderData, setOrderData] = useState({
         paymentType: "",
@@ -111,12 +95,12 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
 
     //popola i campi di orderdata con i dati ereditati da customer
     useEffect(() => {
-        if (customer) {
-            const user = customer;
+        if (customerDetails) {
+            const user = customerDetails;
             setOrderData((prev) => ({
                 ...prev,
                 idcart: storedCartId ?? prev.idcart,
-                iduser: user.iduser ?? prev.iduser,
+                iduser: customer.iduser ?? prev.iduser,
                 shipping: {
                     name: user.name || "",
                     surname: user.surname || "",
@@ -131,8 +115,7 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                 }
             }));
         }
-    }, [customer]);
-
+    }, [customerDetails]);
     /* useEffect(() => {
          //gestisce la visualizzazione del one hour shipping in base al cap
          const fetchCapInfo = async () => {
@@ -163,25 +146,37 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
         orderData.shippingType
     ]);
 
-    const onlyDownloadItems = cartdata?.lineItems?.every(
-        ({ idCategory }) =>
-            idCategory === idcategorySubs || idCategory === idcategoryTickets
-    );
+    useEffect(() => {
+        const getCartId = async () => {
+            const id = await AsyncStorage.getItem('cartId');
+            //console.log('Cart ID from AsyncStorage:', id);
+            if (id && id !== 'null' && id !== '') {
+                setStoredCartId(id);
+                setShouldFetchCart(true);
+            }
+        };
+        getCartId();
+    }, []);
+
+    //console.log("countries",countries)
 
     useEffect(() => {
-        if (onlyDownloadItems) {
-            setOrderData(prev => ({ ...prev, shippingType: 'download' }));
-            setIsSelectedShipping(true);
+        if (storedCartId) {
+            setOrderData(prev => ({
+                ...prev,
+                idcart: storedCartId
+            }));
         }
-    }, [onlyDownloadItems]);
+    }, [storedCartId]);
+
 
     const handleCheckout = async () => {
         try {
             //console.log("orderData");
             const response = await checkout(orderData);
-           // console.log("orderData", orderData);
-           // console.log("response", response);
-            await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + response.data.idorder);
+            // console.log("orderData", orderData);
+            // console.log("response", response);
+            await WebBrowser.openBrowserAsync("https://app.xcart.ai/api/v1/checkout/" + response.data.idorder + "?etoken=" + LICENSE);
             onClose(true);
             if (response?.success || response?.status === 200) {
                 await emptyCart(storedCartId);
@@ -203,6 +198,7 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
     };
 
 
+
     const updateShippingPrice = async () => {
         const { shipping } = orderData;
         if (shipping.cap?.length >= 5 && shipping.country && orderData.shippingType) {
@@ -213,6 +209,8 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                     shippingType: orderData.shippingType,
                 };
                 const resp = await fetchShippingPrice(body);
+                let tot = resp.data + cartdata?.totals?.total - (couponAmount * 100);
+                setFinalTotalNew(tot);
                 setShippingPriceResp(resp.data);
             } catch (err) {
                 console.error("Errore nel calcolo spese di spedizione:", err);
@@ -233,6 +231,11 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                 return;
             }
             setErrorMessage("");
+            if (flagBilling) {
+
+            } else {
+                setStep((prev) => Math.min(prev + 1, totalSteps));
+            }
         }
 
         if (step === 3) {
@@ -240,10 +243,6 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                 setErrorMessage("Seleziona un metodo di spedizione.");
                 return;
             }
-            setErrorMessage("");
-        }
-
-        if (step === 4) {
             if (!isSelectedPayment) {
                 setErrorMessage("Seleziona un metodo di pagamento.");
                 return;
@@ -253,7 +252,13 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
         setStep((prev) => Math.min(prev + 1, totalSteps));
     };
 
-    const handlePrevious = () => setStep((prev) => Math.max(prev - 1, 1));
+    const handlePrevious = () => {
+        if(step === 3 && !flagBilling) {
+            setStep((prev) => Math.max(prev - 2, 1))
+        }else{
+            setStep((prev) => Math.max(prev - 1, 1))
+        }
+    };
 
     const renderStepIndicator = () => {
         return (
@@ -283,20 +288,28 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
         ? (parseFloat(total) || 0) + parseFloat(shippingPriceResp)
         : parseFloat(total) || 0;
 
+    const billingStep = () => {
+        setFlagBilling(!flagBilling);
+    }
+
+    const handleGoToUserDetails = () => {
+        // Chiude la modale
+        if (onClose) {
+            onClose(true);
+        }
+        navigation.getParent()?.navigate("UserDetails");
+    };
 
     return (
-        <View style={styles.container}>
-            {renderStepIndicator()}
-            <View style={styles.contentContainer}>
-                {/**TODO: SHIPPING */}
-                {step === 1 && (
-                    <>
-                        <CustomText style={{ textAlign: "center", marginBottom: 15 }}>Inserisci i dati del cliente</CustomText>
-                        <KeyboardAvoidingView
-                            style={{ flex: 1 }}
-                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            keyboardVerticalOffset={Platform.OS === 'ios' ? 170 : 0}
-                        >
+        <>
+            <View style={styles.container}>
+                <CustomText style={styles.modalTitle}>Checkout</CustomText>
+                {renderStepIndicator()}
+                <View style={styles.contentContainer}>
+                    {/**TODO: SHIPPING */}
+                    {step === 1 && (
+                        <>
+                            <CustomText style={{ textAlign: "center", marginBottom: 15 }}>Dati del cliente</CustomText>
                             <ScrollView
                                 ref={scrollRef}
                                 keyboardShouldPersistTaps="handled"
@@ -304,247 +317,158 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                             >
                                 <View style={{ flex: 1 }}>
                                     {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
-                                    <InputField
-                                        label="Nome"
-                                        placeholder="Inserisci Nome"
-                                        value={orderData.shipping.name}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, name: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Cognome"
-                                        placeholder="Inserisci Cognome"
-                                        value={orderData.shipping.surname}
-                                        onChangeText={(text) => {
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, surname: text } }))
-                                        }}
-                                    />
-                                    <InputField
-                                        label="Email"
-                                        placeholder="Inserisci Email"
-                                        value={orderData.email}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, email: text }))
-                                        }
-                                    />
-                                    <CustomText style={styles.label}>Paese</CustomText>
-                                    <Dropdown
-                                        style={styles.dropdown}
-                                        data={countries.map((ct) => ({ label: ct, value: ct }))}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholderTextColor="grey"
-                                        placeholder="Inserisci il Paese"
-                                        value={orderData.shipping.country}
-                                        onChange={(item) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, country: item.label } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Indirizzo"
-                                        placeholder="Inserisci Indirizzo"
-                                        value={orderData.shipping.address}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, address: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Numero civico"
-                                        placeholder="Inserisci Numero civico"
-                                        value={orderData.shipping.numciv}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, numciv: text } }))
-                                        }
-                                     
-                                    />
-                                    <InputField
-                                        label="Città"
-                                        placeholder="Inserisci Città"
-                                        value={orderData.shipping.city}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, city: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Provincia"
-                                        placeholder="Inserisci Provincia"
-                                        value={orderData.shipping.prov}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, prov: text } }))
-                                        }
-                                        maxLength={2}
-                                    />
-                                    {/**Se checkcap supporta il oneHourShipping */}
-                                    <InputField
-                                        label="CAP"
-                                        placeholder="Inserisci CAP"
-                                        value={orderData.shipping.cap}
-                                        onChangeText={(text) => {
-                                            setCap(text);
-                                            setOrderData((prev) => ({
-                                                ...prev,
-                                                shipping: { ...prev.shipping, cap: text }
-                                            }));
-                                        }}
-                                        maxLength={5}
-                                    />
-                                    <InputField
-                                        label="Telefono"
-                                        placeholder="Inserisci Telefono"
-                                        value={orderData.shipping.phone}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, shipping: { ...prev.shipping, phone: text } }))
-                                        }
-                                    />
-                                </View>
-                            </ScrollView>
-                        </KeyboardAvoidingView>
-                    </>
-                )}
-                {/**TODO: BILLING */}
-                {step === 2 && (
-                    <>
-                        <CustomText style={{ textAlign: "center", marginBottom: 15 }}>I dati di fatturazione sono opzionali</CustomText>
-                        {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
-                        <KeyboardAvoidingView
-                            style={{ flex: 1 }}
-                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            keyboardVerticalOffset={Platform.OS === 'ios' ? 170 : 0}
-                        >
-                            <ScrollView
-                                ref={scrollRef}
-                                keyboardShouldPersistTaps="handled"
-                                contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
-                            >
-                                <View style={{ flex: 1 }}>
-                                    {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
-                                    <InputField
-                                        label="Azienda"
-                                        placeholder="Inserisci Azienda"
-                                        value={orderData.billing.company}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, company: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="VAT"
-                                        placeholder="Inserisci codice SDI"
-                                        value={orderData.billing.vatnumber}
-                                        onChangeText={(text) => {
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, vatnumber: text } }))
-                                        }}
-                                    />
-                                    <InputField
-                                        label="SDI"
-                                        placeholder="Inserisci SDI"
-                                        value={orderData.billing.sdicode}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, sdicode: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Pec"
-                                        placeholder="Inserisci Pec"
-                                        value={orderData.billing.pec}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, pec: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Telefono"
-                                        placeholder="Inserisci telefono"
-                                        value={orderData.billing.phone}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, phone: text } }))
-                                        }
-                                    />
-                                    <CustomText style={styles.label}>Paese</CustomText>
-                                    <Dropdown
-                                        style={styles.dropdown}
-                                        data={countries.map((ct) => ({ label: ct, value: ct }))}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholder="Inserisci Scegli un Paese"
-                                        value={orderData.billing.country}
-                                        onChange={(item) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, country: item.label } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Indirizzo"
-                                        placeholder="Inserisci indirizzo"
-                                        value={orderData.billing.address}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, address: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Num. Civico"
-                                        placeholder="Inserisci Num. Civico"
-                                        value={orderData.billing.numciv}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, numciv: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Città"
-                                        placeholder="Inserisci Città"
-                                        value={orderData.billing.city}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, city: text } }))
-                                        }
-                                    />
-                                    <InputField
-                                        label="Provincia"
-                                        placeholder="Inserisci Provincia"
-                                        value={orderData.billing.prov}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, prov: text } }))
-                                        }
-                                         maxLength={2}
-                                    />
-                                    <InputField
-                                        label="Cap"
-                                        placeholder="Inserisci Cap"
-                                        value={orderData.billing.cap}
-                                        onChangeText={(text) =>
-                                            setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, cap: text } }))
-                                        }
-                                         maxLength={5}
-                                    />
-                                </View>
-                            </ScrollView>
-                        </KeyboardAvoidingView>
-                    </>
-                )}
-                {/*TODO: SHIPPING TYPE*/}
-                {step === 3 && (
-                    <>
-                        {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
-                        <View style={styles.paymentOptionsContainer}>
-                            <CustomText style={styles.label}>Scegli il metodo di spedizione</CustomText>
-                            <ScrollView
-                                contentContainerStyle={{ paddingBottom: 30 }}
-                            >
-                                {/* solo prodotti scaricabili (biglietti/abbonamenti) */}
-                                {onlyDownloadItems && (
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.paymentButton,
-                                            orderData.shippingType === 'download' && { borderColor: primaryColor, borderWidth: 2 }
-                                        ]}
-                                        onPress={() => {
-                                            setOrderData(prev => ({ ...prev, shippingType: 'download' }));
-                                            setIsSelectedShipping(true);
-                                        }}
-                                    >
-                                        <Icon name="download-outline" size={22} color="#333" style={styles.paymentIcon} />
-                                        <CustomText style={styles.paymentText}>Download</CustomText>
-                                    </TouchableOpacity>
-                                )}
+                                    <CustomText style={styles.label}>Nome: </CustomText><CustomText style={styles.text}>{orderData.shipping.name} {orderData.shipping.surname}</CustomText>
+                                    <CustomText style={styles.label}>Email: </CustomText><CustomText style={styles.text}>{orderData.email}</CustomText>
+                                    <CustomText style={styles.label}>Indirizzo: </CustomText><CustomText style={styles.text}>{orderData.shipping.address} {orderData.shipping.numciv} {orderData.shipping.city} {orderData.shipping.prov} {orderData.shipping.cap} {orderData.shipping.country} </CustomText>
+                                    <CustomText style={styles.label}>Telefono: </CustomText><CustomText style={styles.text}>{orderData.shipping.phone}</CustomText>
 
-                                {!onlyDownloadItems && (
+
+                                    <TouchableOpacity onPress={billingStep} style={styles.checkboxWrapper} activeOpacity={0.7}>
+                                        <View style={[styles.box, flagBilling && styles.boxChecked]}>
+                                            {flagBilling && <Icon name="checkmark" size={18} color="#fff" />}
+                                        </View>
+                                        <CustomText style={styles.checkboxLabel}>
+                                            Vuoi utilizzare anche i dati di fatturazione?
+                                        </CustomText>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.buttonEdit}
+                                        onPress={() => handleGoToUserDetails()}
+                                    >
+                                        <CustomText style={styles.buttonText}>Modifica</CustomText>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                        </>
+                    )}
+                    {/**TODO: BILLING */}
+                    {step === 2 && (
+                        <>
+                            <CustomText style={{ textAlign: "center", marginBottom: 15 }}>I dati di fatturazione sono opzionali</CustomText>
+                            {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
+                            <KeyboardAvoidingView
+                                style={{ flex: 1 }}
+                                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                                keyboardVerticalOffset={Platform.OS === 'ios' ? 170 : 0}
+                            >
+                                <ScrollView
+                                    ref={scrollRef}
+                                    keyboardShouldPersistTaps="handled"
+                                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
+                                >
+                                    <View style={{ flex: 1 }}>
+                                        {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
+                                        <InputField
+                                            label="Azienda"
+                                            placeholder="Inserisci Azienda"
+                                            value={orderData.billing.company}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, company: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="VAT"
+                                            placeholder="Inserisci codice SDI"
+                                            value={orderData.billing.vatnumber}
+                                            onChangeText={(text) => {
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, vatnumber: text } }))
+                                            }}
+                                        />
+                                        <InputField
+                                            label="SDI"
+                                            placeholder="Inserisci SDI"
+                                            value={orderData.billing.sdicode}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, sdicode: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Pec"
+                                            placeholder="Inserisci Pec"
+                                            value={orderData.billing.pec}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, pec: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Telefono"
+                                            placeholder="Inserisci telefono"
+                                            value={orderData.billing.phone}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, phone: text } }))
+                                            }
+                                        />
+                                        <CustomText style={styles.label}>Paese</CustomText>
+                                        <Dropdown
+                                            style={styles.dropdown}
+                                            data={countries.map((ct) => ({ label: ct, value: ct }))}
+                                            labelField="label"
+                                            valueField="value"
+                                            placeholder="Inserisci Scegli un Paese"
+                                            value={orderData.billing.country}
+                                            onChange={(item) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, country: item.label } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Indirizzo"
+                                            placeholder="Inserisci indirizzo"
+                                            value={orderData.billing.address}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, address: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Num. Civico"
+                                            placeholder="Inserisci Num. Civico"
+                                            value={orderData.billing.numciv}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, numciv: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Città"
+                                            placeholder="Inserisci Città"
+                                            value={orderData.billing.city}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, city: text } }))
+                                            }
+                                        />
+                                        <InputField
+                                            label="Provincia"
+                                            placeholder="Inserisci Provincia"
+                                            value={orderData.billing.prov}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, prov: text } }))
+                                            }
+                                            maxLength={2}
+                                        />
+                                        <InputField
+                                            label="Cap"
+                                            placeholder="Inserisci Cap"
+                                            value={orderData.billing.cap}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, billing: { ...prev.billing, cap: text } }))
+                                            }
+                                            maxLength={5}
+                                        />
+                                    </View>
+                                </ScrollView>
+                            </KeyboardAvoidingView>
+                        </>
+                    )}
+                    {/*TODO: SHIPPING TYPE*/}
+                    {step === 3 && (
+                        <>
+                            {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
+                            <View style={styles.paymentOptionsContainer}>
+                                <CustomText style={styles.label}>Scegli il metodo di spedizione</CustomText>
+                                <ScrollView
+                                    contentContainerStyle={{ paddingBottom: 30 }}
+                                >
+
+
                                     <>
                                         <TouchableOpacity
                                             style={[
@@ -559,15 +483,6 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                                             <Icon name="storefront-outline" size={22} color="#333" style={styles.paymentIcon} />
                                             <View style={{ flexDirection: 'column', flexShrink: 1 }}>
                                                 <Text style={styles.paymentText}>Ritiro in Sede</Text>
-                                                <Text style={styles.textLocalPickup}>
-                                                    Aterno Gas & Power
-                                                </Text>
-                                                <Text style={styles.textLocalPickup}>
-                                                    Via Edmondo Vicentini snc
-                                                </Text>
-                                                <Text style={styles.textLocalPickup}>
-                                                    67100 L'Aquila AQ
-                                                </Text>
                                             </View>
                                         </TouchableOpacity>
 
@@ -585,166 +500,147 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                                             <CustomText style={styles.paymentText}>Corriere</CustomText>
                                         </TouchableOpacity>
                                     </>
-                                )}
-                            </ScrollView>
-                        </View>
-                    </>
-                )}
-                {/*TODO: PAYMENT TYPE*/}
-                {step === 4 && (
-                    <>
-                        {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
-                        <View style={styles.paymentOptionsContainer}>
-                            <CustomText style={styles.label}>Scegli il metodo di pagamento</CustomText>
-                            <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.paymentButton,
-                                        orderData.paymentType === "stripe" && { borderColor: primaryColor, borderWidth: 2 }
-                                    ]}
-                                    onPress={() => {
-                                        setOrderData((prev) => ({ ...prev, paymentType: "stripe" }));
-                                        setIsSelectedPayment(true);
-                                        setOpenTapToPayDetails(false);
-                                        setCheckoutButton(true);
-                                    }}
-                                >
-                                    <Icon name="card-sharp" size={22} color="#333" style={styles.paymentIcon} />
-                                    <CustomText style={styles.paymentText}>Carta</CustomText>
-                                </TouchableOpacity>
 
-                                {/*<TouchableOpacity
-                                    style={[
-                                        styles.paymentButton,
-                                        orderData.paymentType === "paypal" && { borderColor: primaryColor, borderWidth: 2 }
-                                    ]}
-                                    onPress={() => {
-                                        setOrderData((prev) => ({ ...prev, paymentType: "paypal" }));
-                                        setIsSelectedPayment(true);
-                                        setOpenTapToPayDetails(false);
-                                        setCheckoutButton(true);
-                                    }}
-                                >
-                                    <Icon name="logo-paypal" size={22} color="#333" style={styles.paymentIcon} />
-                                    <CustomText style={styles.paymentText}>PayPal</CustomText>
-                                </TouchableOpacity>*/}
 
-                                <InputField
-                                    label="Note (opzionale)"
-                                    placeholderTextColor="grey"
-                                    style={styles.textArea}
-                                    multiline={true}
-                                    numberOfLines={4}
-                                    placeholder="Inserisci Note per l'ordine"
-                                    value={orderData.notes}
-                                    onChangeText={(text) =>
-                                        setOrderData((prev) => ({ ...prev, shipping: { ...prev, notes: text } }))
-                                    }
-                                />
-                            </ScrollView>
-                        </View>
-                    </>
-                )}
-                {step === 5 && (
-                    <>
-                        <ScrollView contentContainerStyle={{ }}>
-                            {successMessage ? <CustomText style={styles.success}>{successMessage}</CustomText> : null}
-                            <View style={styles.summaryContainer}>
-                                <CustomText style={styles.summaryTitle}>Conferma i dati:</CustomText>
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Nome:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.name}</CustomText>
-                                </View>
+                                    <View style={styles.paymentOptionsContainer}>
+                                        <CustomText style={styles.label}>Scegli il metodo di pagamento</CustomText>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.paymentButton,
+                                                orderData.paymentType === "stripe" && { borderColor: primaryColor, borderWidth: 2 }
+                                            ]}
+                                            onPress={() => {
+                                                setOrderData((prev) => ({ ...prev, paymentType: "stripe" }));
+                                                setIsSelectedPayment(true);
+                                                setOpenTapToPayDetails(false);
+                                                setCheckoutButton(true);
+                                            }}
+                                        >
+                                            <Icon name="card-sharp" size={22} color="#333" style={styles.paymentIcon} />
+                                            <CustomText style={styles.paymentText}>Carta</CustomText>
+                                        </TouchableOpacity>
 
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Cognome:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.surname}</CustomText>
-                                </View>
-
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Indirizzo:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.address}</CustomText>
-                                </View>
-
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Città:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.city}</CustomText>
-                                </View>
-
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>CAP:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.cap}</CustomText>
-                                </View>
-
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Paese:</CustomText>
-                                    <CustomText style={styles.value}>{orderData.shipping.country}</CustomText>
-                                </View>
-                                <View style={styles.summaryItem}>
-                                    <CustomText style={styles.label}>Metodo di pagamento:</CustomText>
-                                    <CustomText style={[styles.value, { textTransform: 'uppercase' }]}>
-                                        {getPaymentLabel(orderData.paymentType)}
-                                    </CustomText>
-                                </View>
-                                {/* Totali - Sconto, Subtotale, Spedizione, Totale */}
-                                <View style={styles.summaryTotals}>
-                                    <View style={styles.summaryItem}>
-                                        <CustomText style={styles.label}>Sconto: <CustomText style={styles.value}>{couponCode || '-'}</CustomText></CustomText>
+                                        <InputField
+                                            label="Note (opzionale)"
+                                            placeholderTextColor="grey"
+                                            style={styles.textArea}
+                                            multiline={true}
+                                            numberOfLines={4}
+                                            placeholder="Inserisci Note per l'ordine"
+                                            value={orderData.notes}
+                                            onChangeText={(text) =>
+                                                setOrderData((prev) => ({ ...prev, shipping: { ...prev, notes: text } }))
+                                            }
+                                        />
                                     </View>
-                                    <View style={styles.summaryItem}>
-                                        <CustomText style={styles.label}>Valore sconto: <CustomText style={styles.value}>{couponAmount != null ? (couponType === "amount" ? formatPrice(couponAmount) : couponAmount + '%') : '-'}</CustomText></CustomText>
-                                    </View>
-                                    <View style={styles.summaryItem}>
-                                        <CustomText style={styles.label}>Sub totale:</CustomText>
-                                        <CustomText style={styles.value}>
-                                            {cartdata?.totals?.subtotal ? formatCartPrice(cartdata.totals.subtotal) : "—"}
-                                        </CustomText>
-                                    </View>
-
-                                    <View style={styles.summaryItem}>
-                                        <CustomText style={styles.label}>Spedizione:</CustomText>
-                                        <CustomText style={styles.value}>
-                                            {shippingPriceResp != null ? formatCartPrice(shippingPriceResp) : "—"}
-                                        </CustomText>
-                                    </View>
-
-                                    <View style={styles.summaryItem}>
-                                        <CustomText style={styles.label}>TOTALE:</CustomText>
-                                        <CustomText style={styles.value}>
-                                            {isNaN(finalTotal) ? "—" : formatCartPrice(finalTotal)}
-                                        </CustomText>
-                                    </View>
-
-
-                                </View>
+                                </ScrollView>
 
                             </View>
-                            {openTapToPayDetails && (
-                                <View>
-                                    <CustomText style={[styles.label, { textAlign: "center" }]}>
-                                        {message ? <CustomText style={styles.success}>{message + '\n'}</CustomText> : null}
-                                        Dati da inserire nell'app di Stripe:</CustomText>
-                                    <View style={styles.copyBox}>
-                                        <CustomText style={styles.label}>Numero ordine:</CustomText>
-                                        <CustomText selectable={true} style={styles.copyValue}>#{checkoutResp.idorder}</CustomText>
+                        </>
+                    )}
+                    {/*TODO: PAYMENT TYPE*/}
+                    {step === 4 && (
+                        <>
+                            <ScrollView contentContainerStyle={{}}>
+                                {successMessage ? <CustomText style={styles.success}>{successMessage}</CustomText> : null}
+                                <View style={styles.summaryContainer}>
+                                    <CustomText style={styles.summaryTitle}>Conferma i dati:</CustomText>
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Nome:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.name}</CustomText>
                                     </View>
-                                    <View style={styles.copyBox}>
-                                        <CustomText style={styles.label}>Importo:</CustomText>
-                                        <CustomText selectable={true} style={styles.copyValue}>{formatPrice(checkoutResp.total)}</CustomText>
+
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Cognome:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.surname}</CustomText>
                                     </View>
-                                    <Button title="Apri Stripe" style={styles.checkoutButton} onPress={handleOpenStripeApp} />
+
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Indirizzo:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.address}</CustomText>
+                                    </View>
+
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Città:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.city}</CustomText>
+                                    </View>
+
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>CAP:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.cap}</CustomText>
+                                    </View>
+
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Paese:</CustomText>
+                                        <CustomText style={styles.value}>{orderData.shipping.country}</CustomText>
+                                    </View>
+                                    <View style={styles.summaryItem}>
+                                        <CustomText style={styles.label}>Metodo di pagamento:</CustomText>
+                                        <CustomText style={[styles.value, { textTransform: 'uppercase' }]}>
+                                            {getPaymentLabel(orderData.paymentType)}
+                                        </CustomText>
+                                    </View>
+                                    {/* Totali - Sconto, Subtotale, Spedizione, Totale */}
+                                    <View style={styles.summaryTotals}>
+                                        <View style={styles.summaryItem}>
+                                            <CustomText style={styles.label}>Sconto: <CustomText style={styles.value}>{couponCode || '-'}</CustomText></CustomText>
+                                        </View>
+                                        <View style={styles.summaryItem}>
+                                            <CustomText style={styles.label}>Valore sconto: <CustomText style={styles.value}>{couponAmount != null ? (couponType === "amount" ? formatPrice(couponAmount) : couponAmount + '%') : '-'}</CustomText></CustomText>
+                                        </View>
+
+                                        <View style={styles.summaryItem}>
+                                            <CustomText style={styles.label}>Spedizione:</CustomText>
+                                            <CustomText style={styles.value}>
+                                                {shippingPriceResp != null ? formatCartPrice(shippingPriceResp) : "—"}
+                                            </CustomText>
+                                        </View>
+
+                                        <View style={styles.summaryItem}>
+                                            <CustomText style={styles.label}>Sub totale:</CustomText>
+                                            <CustomText style={styles.value}>
+                                                {cartdata?.totals?.subtotal ? formatCartPrice(cartdata.totals.subtotal) : "—"}
+                                            </CustomText>
+                                        </View>
+                                        <View style={styles.summaryItem}>
+                                            <CustomText style={styles.label}>TOTALE:</CustomText>
+                                            <CustomText style={styles.value}>
+                                                {/*isNaN(finalTotal) ? "—" : formatCartPrice(finalTotal)*/}
+                                                {
+                                                    finalTotalNew != null ? formatCartPrice(finalTotalNew) : (isNaN(finalTotal) ? "—" : formatCartPrice(finalTotal))
+
+                                                }
+                                            </CustomText>
+                                        </View>
+                                    </View>
                                 </View>
-                            )}
-                        </ScrollView>
-                        {
-                            checkoutButton && (<Button
-                                title="Conferma e Checkout"
-                                onPress={handleCheckout}
-                                style={{ marginTop: 20 }}
-                            />)
-                        }
-                    </>
-                )}
+                                {openTapToPayDetails && (
+                                    <View>
+                                        <CustomText style={[styles.label, { textAlign: "center" }]}>
+                                            {message ? <CustomText style={styles.success}>{message + '\n'}</CustomText> : null}
+                                            Dati da inserire nell'app di Stripe:</CustomText>
+                                        <View style={styles.copyBox}>
+                                            <CustomText style={styles.label}>Numero ordine:</CustomText>
+                                            <CustomText selectable={true} style={styles.copyValue}>#{checkoutResp.idorder}</CustomText>
+                                        </View>
+                                        <View style={styles.copyBox}>
+                                            <CustomText style={styles.label}>Importo:</CustomText>
+                                            <CustomText selectable={true} style={styles.copyValue}>{formatPrice(checkoutResp.total)}</CustomText>
+                                        </View>
+                                        <Button title="Apri Stripe" style={styles.checkoutButton} onPress={handleOpenStripeApp} />
+                                    </View>
+                                )}
+                            </ScrollView>
+                            {
+                                checkoutButton && (<Button
+                                    title="Conferma e Checkout"
+                                    onPress={handleCheckout}
+                                    style={{ marginTop: 20 }}
+                                />)
+                            }
+                        </>
+                    )}
+                </View>
             </View>
             <View style={styles.buttonContainer}>
                 {step > 1 && (
@@ -754,11 +650,49 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                     <Button onPress={handleNext} style={styles.buttonNext} title="Prosegui" />
                 )}
             </View>
-        </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
+    checkboxWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 30,
+        alignSelf: 'flex-start',
+    },
+    checkboxLabel: {
+        marginLeft: 10,
+        fontSize: 15,
+        color: '#333',
+    },
+
+    box: {
+        width: 24,
+        height: 24,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: '#999',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+    },
+    boxChecked: {
+        backgroundColor: primaryColor,
+        borderColor: primaryColor,
+    },
+    buttonEdit: {
+        alignContent: 'center',
+        alignItems: 'center',
+        backgroundColor: primaryColor,
+        padding: 5,
+        borderRadius: 5,
+        marginTop: 40,
+    },
+    buttonText: {
+        fontSize: 20,
+        color: 'white',
+    },
     textLocalPickup: {
         fontSize: 13, color: '#666', marginTop: 2
     },
@@ -802,19 +736,28 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 5,
-        alignItems: 'center',
+        alignItems: 'stretch',
+        backgroundColor: 'white',
+    },
+    containerButton: {
+        flex: 1,
+        paddingTop: 5,
+        alignItems: 'stretch',
         backgroundColor: 'white',
     },
     indicatorContainer: {
         flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
         marginBottom: 20,
     },
+
     stepContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     stepIndicator: {
-        width: 35,
+        width: 45,
         height: 35,
         borderRadius: 20,
         borderWidth: 2,
@@ -850,8 +793,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginTop: 10,
-        marginBottom: 5,
-
+        marginBottom: 10,
     },
     dropdown: {
         marginBottom: 10,
@@ -918,7 +860,6 @@ const styles = StyleSheet.create({
     summaryContainer: {
         width: 340
     },
-
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

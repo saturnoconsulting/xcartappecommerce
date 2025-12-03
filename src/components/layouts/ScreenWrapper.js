@@ -9,8 +9,8 @@ const ScreenWrapper = ({ children, style}) => {
 
     return (
         <SafeAreaView
-            style={[styles.container, style, { paddingBottom: tabBarHeight + 10}]}
-            edges={['left', 'right'] }>
+            style={[styles.container, style, { paddingBottom: tabBarHeight}]}
+            edges={['left', 'right', 'top'] }>
             {children}
         </SafeAreaView>
     );
@@ -20,7 +20,6 @@ const ScreenWrapper = ({ children, style}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 10,
   },
 });
 

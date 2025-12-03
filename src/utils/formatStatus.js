@@ -9,6 +9,7 @@
       case 'suspended': return 'In sospeso';
       case 'shipped': return 'Spedito';
       case 'completed': return 'Completato';
+      case 'draft': return 'Bozza';
       default: return '';
     }
   };
@@ -29,11 +30,12 @@
       return styles.shippedPayment;
     case 'completed':
       return styles.completedPayment;
+    case 'draft':
+      return styles.canceledPayment;
     default:
       return {};
   }
 };
-
 
 export const getTextShippingType = (status) => {
     switch (status) {
@@ -60,6 +62,10 @@ export const getTextShippingType = (status) => {
             return  'Carta (Stripe)' ;
         case 'paypal':
             return  'PayPal';
+        case 'card':
+            return  'Carta di credito';
+        case 'coupon':
+            return  'Coupon';
         default:
             return 'Non specificato';
     }
@@ -83,5 +89,13 @@ export const getTextColor = (status) => {
       case 'expired': return 'gray';
       case 'canceled': return 'red';
       default: return 'black';
+    }
+  };
+
+  export const getReturnMethod = (status) => {
+    switch (status) {
+      case 'courier': return 'Corriere';
+      case 'online': return 'online';
+      default: return '-';
     }
   };

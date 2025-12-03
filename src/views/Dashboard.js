@@ -11,9 +11,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import BoxMatches from '../components/BoxMatches';
 import ProductsHome from '../components/ProductsHome';
-import NewsHome from '../components/NewsHome';
 import useFetchProducts from '../hooks/useFetchProducts';
 import useFetchPosts from '../hooks/useFetchPosts';
 import CustomText from '../components/atoms/CustomText';
@@ -23,6 +21,8 @@ import useCart from '../hooks/useCart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setCartLength } from '../store/actions/cartActions';
 import { useDispatch } from 'react-redux';
+import { backgroundcolor } from '../constants/colors';
+import NewsHome from '../components/NewsHome';
 
 
 const CarouselImage = ({ uri, title, index, totalDots, excerpt, screenWidth }) => {
@@ -78,7 +78,7 @@ const ManualCarousel = ({ data, tagStyles, onSlidePress, screenWidth }) => {
       horizontal
       pagingEnabled
       showsHorizontalScrollIndicator={false}
-      style={{ flex: 1, height: 644 }} // Adjust height as needed
+      style={{ flex: 1, height: 710 }} // Adjust height as needed
     >
       {data.map((item, index) => (
         <TouchableOpacity
@@ -112,16 +112,10 @@ const Dashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [storedCartId, setStoredCartId] = useState(null);
   const [shouldFetchCart, setShouldFetchCart] = useState(false);
-  const [subActive, setSubActive] = useState(false);
-
 
 const { prods, refreshProducts } = useFetchProducts({
   ids: null,
   params: {
-    idsCategory: [
-      '9071b96a-d055-469a-a8ce-93b8c2f07965', // biglietti
-      '0f0ff9e1-fe69-4f87-9314-e19764ff2692', // abbonamenti
-    ],
   },
 });
 
@@ -164,6 +158,18 @@ const { prods, refreshProducts } = useFetchProducts({
     }
   }, [cartData]);
 
+    useEffect(() => {
+    if (Array.isArray(posts)) {
+      const list = [];
+      const slider = [];
+      posts.forEach(post => {
+        if (post.type === 'list') list.push(post);
+        else if (post.type === 'slider') slider.push(post);
+      });
+      setListPosts(list);
+      setSliderPosts(slider);
+    }
+  }, [posts]);
 
   /*const memoizedTagStyles = useMemo(() => ({
     ...tagsStyles,
@@ -176,18 +182,7 @@ const { prods, refreshProducts } = useFetchProducts({
     refreshPosts();
     refreshProducts();
     //fetch del carrello 
-    refetch();
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const fetchActive = async () => {
-        let active = await getSubActive();
-        setSubActive(active);
-      };
-      fetchActive();
-    }, [])
-  );
 
   useEffect(() => {
     if (Array.isArray(posts)) {
@@ -228,27 +223,28 @@ const { prods, refreshProducts } = useFetchProducts({
           onSlidePress={handleSlidePress}
         />
       )}
-      <BoxMatches subActive={subActive} />
       <ProductsHome products={prods} />
       <NewsHome
-        styleTitle={{ textAlign: "left", paddingHorizontal: 20, paddingVertical: 30 }}
+        styleTitle={{ textAlign: "left", paddingHorizontal: 20, paddingVertical: 5 }}
         styleCards={{ marginHorizontal: 20 }}
         listPosts={listPosts}
         refreshing={loadingPosts}
         onRefresh={refreshPosts}
         onLoadMore={loadMorePosts}
         isFetchingMore={isFetchingMore} />
+
     </View>
   );
 
   return (
     <FlatList
+      style={{ backgroundColor: backgroundcolor}} 
       data={[]}
       keyExtractor={(_, index) => index.toString()}
       ListHeaderComponent={renderHeader}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 100 }}
+      contentContainerStyle={{ paddingBottom: 50 }}
     />
   );
 };

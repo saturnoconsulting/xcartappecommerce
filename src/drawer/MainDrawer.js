@@ -1,36 +1,26 @@
 import React, { useState } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Image, View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { logout } from "../api/user";
 import Loading from "../components/Loading";
 import { useSelector } from "react-redux";
 import { GET_USER } from "../store/selectors/userSelector";
 import { primaryColor } from "../constants/colors";
 import Tabs from "./Tabs";
-import CustomBackButton from "../components/atoms/CustomBackHome";
 import { GET_CART_LENGHT } from "../store/selectors/cartSelector";
 import useNotifications from '../hooks/useNotifications';
-import { logo } from "../constants/images";
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = ({ navigation, setLoading }) => {
     const user = useSelector(GET_USER);
-    const [showPlayersSubmenu, setShowPlayersSubmenu] = useState(false);
-    const [showRankingSubmenu, setShowRankingSubmenu] = useState(false);
-
-    const toggleSubmenu = () => {
-        setShowPlayersSubmenu((prev) => !prev);
-    };
 
     return (
         <View style={styles.drawerContainer}>
-            <View style={styles.profileSection}>
+            {/*} <View style={styles.profileSection}>
                 <Text style={styles.profileName}>{user.name} {user.surname}</Text>
-            </View>
+            </View>*/}
             <View style={styles.menuSection}>
-                 {/* News */}
+                {/* News 
                 <TouchableOpacity style={styles.menuItem} onPress={() =>
                     navigation.navigate("Tabs", { screen: "Home", params: { screen: "Posts", params: { idCat: "1", nameCat: "News" } } })
                 }>
@@ -38,7 +28,6 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                     <Text style={styles.menuText}>News</Text>
                 </TouchableOpacity>
 
-                {/* Squadra con Sottomenu */}
                 <TouchableOpacity style={styles.menuItem} onPress={toggleSubmenu}>
                     <Icon name="people-circle-outline" size={22} color="white" />
                     <Text style={styles.menuText}>La Squadra</Text>
@@ -93,7 +82,7 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                     </View>
                 )}
 
-                {/* Classifiche con sottomenu */}
+                {/* Classifiche con sottomenu 
                 <TouchableOpacity style={styles.menuItem} onPress={() => setShowRankingSubmenu(prev => !prev)}>
                     <Icon name="trophy-outline" size={22} color="white" />
                     <Text style={styles.menuText}>Campionati</Text>
@@ -104,18 +93,16 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                         style={{ marginLeft: 'auto' }}
                     />
                 </TouchableOpacity>
-        
                 <TouchableOpacity style={styles.menuItem} onPress={() =>
                     navigation.navigate("Tabs", { screen: "Home", params: { screen: "Posts", params: { idCat: "5", nameCat: "Sponsor" } } })
                 }>
                     <Icon name="business-outline" size={22} color="white" />
                     <Text style={styles.menuText}>Sponsor</Text>
                 </TouchableOpacity>
-             
+       */}
             </View>
-
             <View style={styles.logoutSection}>
-                <TouchableOpacity
+               {/*<TouchableOpacity
                     style={styles.menuItem}
                     onPress={async () => {
                         try {
@@ -131,6 +118,7 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
                     <Icon name="log-out-outline" size={22} color="white" />
                     <Text style={styles.menuText}>Logout</Text>
                 </TouchableOpacity>
+                */}
             </View>
         </View>
     );
@@ -140,7 +128,7 @@ const CustomDrawerContent = ({ navigation, setLoading }) => {
 const MainDrawer = () => {
     const [loading, setLoading] = useState(false);
     const cart_lenght = useSelector(GET_CART_LENGHT);
-    useNotifications(); 
+    useNotifications();
 
     return (
         <>
@@ -149,9 +137,10 @@ const MainDrawer = () => {
                 screenOptions={({ navigation }) => ({
                     gestureEnabled: false,
                     swipeEnabled: false,
+                    headerShown: true,
                     header: () => (
                         <View style={styles.customHeader}>
-                            <View style={styles.headerSide}>
+                            {/*<View style={styles.headerSide}>
                                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
                                     <Icon name="menu" size={28} color="white" />
                                 </TouchableOpacity>
@@ -171,7 +160,7 @@ const MainDrawer = () => {
                                         <View style={styles.cartBadge}></View>
                                     )}
                                 </TouchableOpacity>
-                            </View>
+                            </View>*/}
                         </View>
                     ),
                     drawerStyle: { backgroundColor: "black", width: 250 },
@@ -181,7 +170,7 @@ const MainDrawer = () => {
                 })}
             >
                 <Drawer.Screen name="Tabs" component={Tabs} />
-              
+
             </Drawer.Navigator>
 
             {loading && <Loading />}
@@ -238,12 +227,12 @@ const styles = StyleSheet.create({
         marginLeft: 15,
     },
     customHeader: {
-        height: 120,
+        //height: 120,
         backgroundColor: "black",
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: Platform.OS === 'ios' ? '50' : '10',
+        //paddingTop: Platform.OS === 'ios' ? '50' : '10',
     },
     headerSide: {
         width: 60,

@@ -12,6 +12,7 @@ const useCart = () => {
     try {
       const storedId = await AsyncStorage.getItem("cartId");
       console.log("Cart ID from AsyncStorage usecart:", storedId);
+  
       if (!storedId) return;
 
       setLoading(true);

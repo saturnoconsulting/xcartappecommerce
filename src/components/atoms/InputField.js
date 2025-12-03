@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: "100%",
-    alignItems: "center",
+    alignItems: "stretch",
     marginBottom: 9
   },
   label: {

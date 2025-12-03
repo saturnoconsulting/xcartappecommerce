@@ -6,6 +6,7 @@ import ProductDetails from '../views/ProductDetails';
 import CategoryShop from '../views/CategoryShop';
 import CustomBackButton from '../components/atoms/CustomBackHome';
 import { backgroundcolor } from '../constants/colors';
+import Cart from '../views/Cart';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,12 @@ export default function ShopStack() {
           title: "Dettaglio",
           headerStyle: { backgroundColor: backgroundcolor },
           headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
+        })}/>
+        <Stack.Screen name="Cart" component={Cart} options={({ route }) => ({
+          headerShown: true,
+          title: "Carrello",
+          headerStyle: { backgroundColor: backgroundcolor },
+          //headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
         })}/>
       <Stack.Screen name="CategoryShop" component={CategoryShop} options={{ headerShown: true, title: "Negozio", headerStyle: { backgroundColor: backgroundcolor }, headerLeft: () => <CustomBackButton targetScreen="Shop" /> }} />
     </Stack.Navigator>

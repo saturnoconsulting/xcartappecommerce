@@ -7,17 +7,18 @@ export const signup = "signup";
 export const accountDelete = "account/delete";
 export const recover = "recover";
 
- 
 export const message = "message";
+
+export const salespoint = "salespoints";
 
 export const products = "products";
 export const orders = "orders";
+export const returns = "returns";
 export const checkout = "checkout";
 export const checkCoupon = "checkcoupon";
 export const checkCAP = "checkcap";
 export const shippingPrice = "getshippingprice";
 
-export const posts = "posts";
 export const updateCustomer = "editprofile";
 export const stocks = "data/stocks/";
 export const categories = "categories";

@@ -7,17 +7,16 @@ import { API_URL, LICENSE, IDSALESPOINT } from '../config';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 0,
 });
 
 const rawApi = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 0,
 });
 
 api.interceptors.request.use(async (config) => {
   try {
-    console.log("LICENSE", LICENSE )
     const token = await SecureStore.getItemAsync('user_token');
       config.headers.Authorization = `Bearer ${token}`;
       config.headers['e-token'] = LICENSE;
@@ -70,7 +69,12 @@ api.interceptors.response.use(
     switch (status) {
       case 400:
         console.log("error.response.data.error;",error.response.data.error)
-        errorMessage = error.response.data.error;
+        if(error.response.data && error.response.data.error === "Empty idvariant."){
+          errorMessage = "Seleziona una variante del prodotto.";
+        }else{
+          console.log("Errore 400 dettagli:", error.response.data);
+          errorMessage = error.response.data.error;
+        }
         break;
       case 401:
         errorMessage = "Non autorizzato.";
@@ -79,10 +83,10 @@ api.interceptors.response.use(
         errorMessage = "Accesso negato.";
         break;
       case 404:
-        // Se è la rotta del carrello, non mostrare messaggio
+        //Se è la rotta del carrello, non mostrare messaggio
         if (originalRequest.url.includes(endpoints.getCart)) {
           // Silenzioso per /getCart
-          await AsyncStorage.removeItem("cartId");
+          let idcart = await AsyncStorage.removeItem("cartId");
           return Promise.reject(error);
         }
         errorMessage = "Risorsa non trovata.";
