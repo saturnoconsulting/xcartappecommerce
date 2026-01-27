@@ -40,12 +40,12 @@ const ReturnsModal = ({ onClose, orderDetails }) => {
                 const onlineSp = sp.find(
                     (s) => s.externalid === "ONLINE" || s.name?.toUpperCase() === "ONLINE"
                 );
-                    setOnlineSalespointId(onlineSp.externalid);
-                    // Imposto anche come default per idsalespoint
-                    setSalespoint(onlineSp.externalid);
-                    // E come testo visualizzato
-                    setArrivalStore(onlineSp.name || "ONLINE");
-               
+                setOnlineSalespointId(onlineSp.externalid);
+                // Imposto anche come default per idsalespoint
+                setSalespoint(onlineSp.externalid);
+                // E come testo visualizzato
+                setArrivalStore(onlineSp.name || "ONLINE");
+
             } catch (e) {
                 console.log("Errore fetchSalespoint:", e);
                 setArrivalStore("ONLINE");
@@ -227,7 +227,13 @@ const ReturnsModal = ({ onClose, orderDetails }) => {
     return (
         <ScrollView style={{ flex: 1, width: "96%", padding: 10 }}>
 
-            <CustomText style={styles.title}>Effettua reso</CustomText>
+            <View style={styles.header}>
+                <CustomText style={styles.modalTitle}>Effettua Reso</CustomText>
+                <TouchableOpacity style={styles.closeButton} onPress={() => onClose(true)}>
+                    <Icon name="close" size={40} color="black" />
+                </TouchableOpacity>
+            </View>
+
             {errorMessage ? <CustomText style={styles.error}>{errorMessage}</CustomText> : null}
             {/* METODO RESO */}
             <CustomText style={styles.subtitle}>Come vuoi restituire l'articolo?</CustomText>
@@ -429,5 +435,17 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         textAlign: "center",
         color: "red"
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        alignItems: 'center',
     },
 });

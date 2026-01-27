@@ -8,6 +8,8 @@ import { backgroundcolor, primaryColor } from '../constants/colors';
 import { CardStyleInterpolators } from '@react-navigation/stack';
 import PostsDetails from '../views/PostsDetails';
 import ProductDetails from '../views/ProductDetails';
+import MatchesVOD from '../views/MatchesVOD';
+import VideoMatchLive from '../views/VideoMatchLive';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +33,18 @@ export default function HomeStack() {
           headerStyle: { backgroundColor: backgroundcolor },
           headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
         })}/>
+      <Stack.Screen name="MatchesVOD" component={MatchesVOD} options={{ 
+          headerShown: true, 
+          title: "Eventi", 
+          headerStyle: { backgroundColor: backgroundcolor }, 
+          headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
+        }} />
+      <Stack.Screen name="VideoMatchLive" component={VideoMatchLive} options={{ 
+          headerShown: true, 
+          title: "Ora in Diretta", 
+          headerStyle: { backgroundColor: backgroundcolor }, 
+          headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
+        }} />
         </Stack.Navigator>
   );
 }

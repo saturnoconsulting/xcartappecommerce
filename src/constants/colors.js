@@ -1,3 +1,3 @@
-export const primaryColor = "#00495f";// #00722D
-export const backgroundcolor = "#fff"
-export const secondaryColor = "#17ad9eff";
+// Carica i colors dal brand corrente
+// Per retrocompatibilità, re-exporta i valori dal brand corrente
+export { primaryColor, backgroundcolor, secondaryColor } from '../utils/brandConstants';

@@ -11,6 +11,7 @@ import UserDetailsRecap from '../views/UserDetailsRecap';
 import Returns from '../views/Returns';
 import ReturnsDetails from '../views/ReturnsDetails';
 import ProductDetails from '../views/ProductDetails';
+import Subscriptions from '../views/Subscriptions';
 
 const Stack = createStackNavigator();
 
@@ -97,6 +98,14 @@ export default function UserStack() {
         options={{
           headerShown: true,
           title: "Dettaglio",
+          headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
+        }}
+      />
+       <Stack.Screen
+        name="Subscriptions"
+        component={Subscriptions}
+        options={{
+          title: "I tuoi abbonamenti",
           headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
         }}
       />

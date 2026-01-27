@@ -1,106 +1,29 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   useWindowDimensions,
   FlatList,
   RefreshControl,
   StyleSheet,
-  Dimensions,
-  ScrollView,
-  ImageBackground,
-  ActivityIndicator,
-  TouchableOpacity,
 } from 'react-native';
 import ProductsHome from '../components/ProductsHome';
 import useFetchProducts from '../hooks/useFetchProducts';
 import useFetchPosts from '../hooks/useFetchPosts';
-import CustomText from '../components/atoms/CustomText';
+import useCategories from '../hooks/useCategories';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { getSubActive } from '../api/subs';
 import useCart from '../hooks/useCart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setCartLength } from '../store/actions/cartActions';
 import { useDispatch } from 'react-redux';
 import { backgroundcolor } from '../constants/colors';
 import NewsHome from '../components/NewsHome';
-
-
-const CarouselImage = ({ uri, title, index, totalDots, excerpt, screenWidth }) => {
-
-
-  const [loaded, setLoaded] = useState(false);
-{/*width: screenWidth, height: 644 */}
-  return (
-    <View style={{ flex: 1,height: 644, width: screenWidth }}> 
-      {!loaded && (
-        <View style={styles.imageLoader}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      )}
-      <ImageBackground
-        source={{ uri }}
-        style={{ flex: 1, justifyContent: 'flex-end' }}
-        imageStyle={{
-          width: '100%',
-          height: '100%',
-          resizeMode: 'cover',
-          opacity: loaded ? 1 : 0,
-        }}
-        onLoadEnd={() => setLoaded(true)}
-      >
-        {loaded && (
-          <View style={styles.overlay}>
-            <CustomText style={styles.title} numberOfLines={1}>{title}</CustomText>
-            {/* <HTMLRender
-              contentWidth={screenWidth - 140}
-              source={{ html: description }}
-              tagsStyles={tagStyles}
-            />*/}
-            <CustomText style={styles.textEcerpt}>{excerpt}</CustomText>
-            <View style={styles.dotContainer}>
-              {[...Array(totalDots)].map((_, i) => (
-                <View
-                  key={i}
-                  style={[styles.dot, index === i && styles.activeDot]}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-      </ImageBackground>
-    </View>
-  );
-};
-//width: screenWidth, height: 644 
-const ManualCarousel = ({ data, tagStyles, onSlidePress, screenWidth }) => {
-  return (
-    <ScrollView
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      style={{ flex: 1, height: 710 }} // Adjust height as needed
-    >
-      {data.map((item, index) => (
-        <TouchableOpacity
-          key={index}
-          activeOpacity={0.9}
-          onPress={() => onSlidePress(item)}
-        >
-          <CarouselImage
-            screenWidth={screenWidth}
-            excerpt={item.excerpt}
-            uri={item.imagepath}
-            title={item.title}
-            description={item.excerpt}
-            index={index}
-            totalDots={data.length}
-            tagStyles={tagStyles}
-          />
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
-};
+import ManualCarousel from '../components/Carousel';
+import DashboardHeader from '../components/DashboardHeader';
+import CategoriesBox from '../components/CategoriesBox';
+import FoodCategoriesSection from '../components/FoodCategoriesSection';
+import { activityType, xEventsWidget } from '../utils/brandConstants';
+import { getSubActive } from '../api/subs';
+import BoxMatches from '../components/BoxMatches';
 
 
 const Dashboard = () => {
@@ -112,12 +35,13 @@ const Dashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [storedCartId, setStoredCartId] = useState(null);
   const [shouldFetchCart, setShouldFetchCart] = useState(false);
+  const [subActive, setSubActive] = useState(false);
 
-const { prods, refreshProducts } = useFetchProducts({
-  ids: null,
-  params: {
-  },
-});
+  const { prods, refreshProducts } = useFetchProducts({
+    ids: null,
+    params: {
+    },
+  });
 
   const { posts, refreshPosts,
     loading: loadingPosts,
@@ -125,7 +49,9 @@ const { prods, refreshProducts } = useFetchProducts({
     isFetchingMore,
     canLoadMore, } = useFetchPosts({ params: { types: ["list", "slider"] } });
 
-  const {height, width} = useWindowDimensions();
+  const { cats, loading: loadingCategories, refreshCategories } = useCategories();
+
+  const { height, width } = useWindowDimensions();
 
   //quando il componente viene montato, recupera l'id del carrello salvato in AsyncStorage
   useEffect(() => {
@@ -158,32 +84,29 @@ const { prods, refreshProducts } = useFetchProducts({
     }
   }, [cartData]);
 
-    useEffect(() => {
-    if (Array.isArray(posts)) {
-      const list = [];
-      const slider = [];
-      posts.forEach(post => {
-        if (post.type === 'list') list.push(post);
-        else if (post.type === 'slider') slider.push(post);
-      });
-      setListPosts(list);
-      setSliderPosts(slider);
-    }
-  }, [posts]);
 
-  /*const memoizedTagStyles = useMemo(() => ({
-    ...tagsStyles,
-    p: { ...tagsStyles.p, color: '#ccc' },
-    div: { color: '#ccc' },
-    span: { color: '#ccc' },
-  }), []);*/
+
 
   useEffect(() => {
     refreshPosts();
     refreshProducts();
-    //fetch del carrello 
+    refreshCategories();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const fetchActive = async () => {
+        let active = await getSubActive();
+        setSubActive(active);
+      };
+      if(xEventsWidget) {
+        fetchActive();
+      }
+    }, [])
+  );
+
+
+  // carica contenuti del CMS per slider e post/news
   useEffect(() => {
     if (Array.isArray(posts)) {
       const list = [];
@@ -203,6 +126,7 @@ const { prods, refreshProducts } = useFetchProducts({
     try {
       await refreshProducts();
       await refreshPosts();
+      await refreshCategories();
     } finally {
       setRefreshing(false);
     }
@@ -212,87 +136,67 @@ const { prods, refreshProducts } = useFetchProducts({
     navigation.navigate('PostsDetails', { post });
   };
 
-{/*maxWidth: screenWidth*/}
-  const renderHeader = () => (
-    <View style={{ flex: 1, maxWidth: width}}> 
-      {sliderPosts.length > 0 && (
-        <ManualCarousel
-          data={sliderPosts}
-          screenWidth={width}
-          //tagStyles={memoizedTagStyles}
-          onSlidePress={handleSlidePress}
-        />
-      )}
-      <ProductsHome products={prods} />
-      <NewsHome
-        styleTitle={{ textAlign: "left", paddingHorizontal: 20, paddingVertical: 5 }}
-        styleCards={{ marginHorizontal: 20 }}
-        listPosts={listPosts}
-        refreshing={loadingPosts}
-        onRefresh={refreshPosts}
-        onLoadMore={loadMorePosts}
-        isFetchingMore={isFetchingMore} />
+  const renderHeader = () => {
+    const isFood = activityType === 'food';
+    const isXEventsWidget = xEventsWidget;
 
-    </View>
-  );
+    return (
+      <View style={{ flex: 1, maxWidth: width }}>
+        {isFood ? (
+          <></>
+        ) : (<>
+          {sliderPosts.length > 0 && (
+            <ManualCarousel
+              data={sliderPosts}
+              screenWidth={width}
+              onSlidePress={handleSlidePress}
+            />
+          )}
+        </>
+        )}
+
+        {isFood ? (
+          <FoodCategoriesSection />
+        ) : (
+          <CategoriesBox categories={cats} loading={loadingCategories} />
+        )}
+        {isXEventsWidget && (
+         <BoxMatches subActive={subActive} />
+        )}
+
+        <ProductsHome products={prods} />
+        <NewsHome
+          styleTitle={{ textAlign: "left", paddingHorizontal: 20, paddingVertical: 5 }}
+          styleCards={{ marginHorizontal: 20 }}
+          listPosts={listPosts}
+          refreshing={loadingPosts}
+          onRefresh={refreshPosts}
+          onLoadMore={loadMorePosts}
+          isFetchingMore={isFetchingMore} />
+      </View>
+    );
+  };
 
   return (
-    <FlatList
-      style={{ backgroundColor: backgroundcolor}} 
-      data={[]}
-      keyExtractor={(_, index) => index.toString()}
-      ListHeaderComponent={renderHeader}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 50 }}
-    />
+    <View style={styles.container}>
+      <DashboardHeader />
+      <FlatList
+        style={{ backgroundColor: backgroundcolor }}
+        data={[]}
+        keyExtractor={(_, index) => index.toString()}
+        ListHeaderComponent={renderHeader}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 50 }}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  textEcerpt: {
-    fontSize: 14,
-    color: '#ccc',
-    paddingTop: 10
-  },
-  dotContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ccc',
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: '#fff',
-    width: 10,
-    height: 10,
-  },
-  overlay: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  imageLoader: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
+  container: {
+    flex: 1,
+    backgroundColor: backgroundcolor,
   },
 });
 

@@ -253,9 +253,9 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
     };
 
     const handlePrevious = () => {
-        if(step === 3 && !flagBilling) {
+        if (step === 3 && !flagBilling) {
             setStep((prev) => Math.max(prev - 2, 1))
-        }else{
+        } else {
             setStep((prev) => Math.max(prev - 1, 1))
         }
     };
@@ -303,7 +303,12 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
     return (
         <>
             <View style={styles.container}>
-                <CustomText style={styles.modalTitle}>Checkout</CustomText>
+                <View style={styles.header}>
+                    <CustomText style={styles.modalTitle}>Checkout</CustomText>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => onClose(true)}>
+                        <Icon name="close" size={40} color="black" />
+                    </TouchableOpacity>
+                </View>
                 {renderStepIndicator()}
                 <View style={styles.contentContainer}>
                     {/**TODO: SHIPPING */}
@@ -322,6 +327,12 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                                     <CustomText style={styles.label}>Indirizzo: </CustomText><CustomText style={styles.text}>{orderData.shipping.address} {orderData.shipping.numciv} {orderData.shipping.city} {orderData.shipping.prov} {orderData.shipping.cap} {orderData.shipping.country} </CustomText>
                                     <CustomText style={styles.label}>Telefono: </CustomText><CustomText style={styles.text}>{orderData.shipping.phone}</CustomText>
 
+                                    <TouchableOpacity
+                                        style={styles.buttonEdit}
+                                        onPress={() => handleGoToUserDetails()}
+                                    >
+                                        <CustomText style={styles.buttonText}>Modifica</CustomText>
+                                    </TouchableOpacity>
 
                                     <TouchableOpacity onPress={billingStep} style={styles.checkboxWrapper} activeOpacity={0.7}>
                                         <View style={[styles.box, flagBilling && styles.boxChecked]}>
@@ -332,12 +343,7 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
                                         </CustomText>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity
-                                        style={styles.buttonEdit}
-                                        onPress={() => handleGoToUserDetails()}
-                                    >
-                                        <CustomText style={styles.buttonText}>Modifica</CustomText>
-                                    </TouchableOpacity>
+
                                 </View>
                             </ScrollView>
                         </>
@@ -655,6 +661,12 @@ const CheckoutWeb = ({ couponType, couponCode, customer, cartdata, onClose, tota
 };
 
 const styles = StyleSheet.create({
+    modalTitle:{
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        alignItems: 'center',
+    },
     checkboxWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -703,6 +715,12 @@ const styles = StyleSheet.create({
     copyValue: {
         fontSize: 16,
         color: "#222",
+    },
+    header:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20
     },
     copyBox: {
         width: "100%",

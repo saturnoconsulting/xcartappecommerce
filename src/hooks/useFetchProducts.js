@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import * as endpoints from "../constants/endpoints";
 import { api } from "../services/api";
-import { IDSALESPOINT } from "../config";
 
 const useFetchProducts = ({ params: initialParams = {} } = {}) => {
   const [params, setParams] = useState(initialParams);
@@ -19,12 +18,11 @@ const useFetchProducts = ({ params: initialParams = {} } = {}) => {
       if (!isRefresh && nextPage === 1) setLoading(true);
       if (isRefresh) setRefreshing(true);
       if (nextPage > 1) setIsFetchingMore(true);
-
-      console.log("params in fetchProducts:", params); 
+      
+      console.log(JSON.stringify(params, null, 2));
 
       try {
         const queryParams = {
-          idsalespoint: IDSALESPOINT,
           start: (nextPage - 1) * 9,
           limit: 9,
           type: "app",
@@ -35,9 +33,13 @@ const useFetchProducts = ({ params: initialParams = {} } = {}) => {
           barcode: params?.barcode || null,
         };
 
+        // Aggiungi filterOptions solo se presente e non vuoto
+        if (params?.filterOptions && Array.isArray(params.filterOptions) && params.filterOptions.length > 0) {
+          queryParams.filterOptions = params.filterOptions;
+        }
         const response = await api.post(endpoints.products, queryParams);
 
-        console.log("Fetched products response", response.data);
+        //console.log("Fetched products response", response.data);
         if (response?.data?.products) {
           const newProds = response.data.products;
           setTotalCount(response.data.totalCount || 0);
@@ -47,6 +49,15 @@ const useFetchProducts = ({ params: initialParams = {} } = {}) => {
         }
       } catch (e) {
         console.error("Errore nel recupero dei prodotti:", e);
+       
+        if (e.response) {
+          console.error("Response data:", e.response.data);
+          console.error("Response status:", e.response.status);
+          console.error("Response headers:", e.response.headers);
+        }
+        if (e.request) {
+          console.error("Request:", e.request);
+        }
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -71,10 +82,16 @@ const useFetchProducts = ({ params: initialParams = {} } = {}) => {
     }
   }, [page, totalCount, fetchProducts, isFetchingMore]);
 
+  // Serializza i params per rilevare cambiamenti profondi
+  const paramsString = useMemo(() => JSON.stringify(params), [params]);
+
   // Aggiorna automaticamente al cambio di params
   useEffect(() => {
+    // Esegui sempre il fetch quando params cambia, anche se è vuoto (per resettare i filtri)
+    setPage(1);
     fetchProducts(true, 1);
-  }, [params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramsString]);
 
   return {
     prods,

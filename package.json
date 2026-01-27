@@ -5,11 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
+    "start:brand": "BRAND=${BRAND:-xcart} expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:prod": "eas build --platform android --profile production --no-wait",
     "build:dev": "eas build --profile development --platform android --no-wait",
+    "build:brand": "node scripts/build-brand.js",
+    "list:brands": "node scripts/list-brands.js",
+    "create:brand": "node scripts/create-brand.js",
     "publish:prod": "eas update --platform all --branch prod"
   },
   "dependencies": {

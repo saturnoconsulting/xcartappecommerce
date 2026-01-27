@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,15 +19,23 @@ export default function CategoryShop() {
   const route = useRoute();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const prevIdcatRef = useRef(null);
+  const prevCategoryTypeRef = useRef(null);
+  const prevSearchQueryRef = useRef('');
 
   const idcat = route.params?.idCategory;
-
   const namecat = route.params?.name;
+  const categoryType = route.params?.categoryType;
 
-  const params = useMemo(() => ({
-    idsCategory: [idcat],
-    description: searchQuery || null,
-  }), [idcat, searchQuery]);
+  // Mappa i categoryType ai tag per l'API
+  const getTagFromCategoryType = (type) => {
+    const tagMap = {
+      recommended: 'recommended',
+      box: 'box',
+      bestsellers: 'bestsellers',
+    };
+    return tagMap[type] || null;
+  };
 
   const {
     prods,
@@ -36,30 +44,57 @@ export default function CategoryShop() {
     loadMoreProducts,
     isFetchingMore,
     setPage,
-
+    setParams,
   } = useFetchProducts({
     ids: null,
-    params,
+    params: {
+      idsCategory: idcat ? [idcat] : null,
+      tags: categoryType ? [getTagFromCategoryType(categoryType)] : null,
+      description: null,
+    },
   });
 
-
+  // Aggiorna i params solo quando idcat, categoryType o searchQuery cambiano effettivamente
   useEffect(() => {
-    setPage(1);
-
-    const timeout = setTimeout(() => {
-      if (searchQuery.length === 0 || searchQuery.length >= 3) {
-        setIsSearching(true);
-        refreshProducts().finally(() => setIsSearching(false));
+    const idcatChanged = idcat !== prevIdcatRef.current;
+    const categoryTypeChanged = categoryType !== prevCategoryTypeRef.current;
+    const searchQueryChanged = searchQuery !== prevSearchQueryRef.current;
+    
+    // Esegui l'aggiornamento se c'è almeno idcat o categoryType
+    if ((idcat || categoryType) && (idcatChanged || categoryTypeChanged || searchQueryChanged)) {
+      if (idcatChanged) {
+        prevIdcatRef.current = idcat;
       }
-    }, 400); // debounce
+      if (categoryTypeChanged) {
+        prevCategoryTypeRef.current = categoryType;
+      }
+      if (searchQueryChanged) {
+        prevSearchQueryRef.current = searchQuery;
+      }
+      
+      const newParams = {
+        description: searchQuery || null,
+      };
+      
+      if (idcat) {
+        newParams.idsCategory = [idcat];
+      }
+      
+      if (categoryType) {
+        const tag = getTagFromCategoryType(categoryType);
+        if (tag) {
+          newParams.tags = [tag];
+        }
+      }
+      
+      setParams(newParams);
+      if (idcatChanged || categoryTypeChanged) {
+        setPage(1);
+      }
+    }
+  }, [idcat, categoryType, searchQuery, setParams, setPage]);
 
-    return () => clearTimeout(timeout);
-  }, [searchQuery]);
-
-
-  useEffect(() => {
-    refreshProducts().finally(() => setIsSearching(false));
-  }, [idcat]);
+  console.log("prods category shop", prods);
 
   return (
     <SafeAreaView style={styles.safeArea}>

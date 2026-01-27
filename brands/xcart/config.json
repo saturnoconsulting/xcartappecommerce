@@ -1,0 +1,28 @@
+{
+  "name": "XCart.ai",
+  "slug": "xcart",
+  "displayName": "XCart.ai",
+  "version": "1.0.0",
+  "runtimeVersion": "1.0.2",
+  "icon": "./brands/xcart/assets/xcartlogoblack.png",
+  "adaptiveIcon": "./brands/xcart/assets/xcartlogoblack.png",
+  "splashImage": "./brands/xcart/assets/splashscreen.png",
+  "splashBackgroundColor": "#000000",
+  "favicon": "./brands/xcart/assets/favicon.png",
+  "notificationIcon": "./brands/xcart/assets/notification-icon.png",
+  "ios": {
+    "bundleIdentifier": "com.saturnoconsulting.xcart",
+    "buildNumber": "1"
+  },
+  "android": {
+    "package": "com.saturnoconsulting.xcart",
+    "versionCode": 1,
+    "googleServicesFile": "./android/app/google-services.json"
+  },
+  "eas": {
+    "projectId": "95ee478b-f08f-42a5-911f-69fa670d7596"
+  },
+  "updates": {
+    "url": "https://u.expo.dev/95ee478b-f08f-42a5-911f-69fa670d7596"
+  }
+}

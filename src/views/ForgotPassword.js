@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const submit = async () => {
-    try {
+    try { 
       await api.recover({ email });
       showMessage({
         message: "Ottimo",

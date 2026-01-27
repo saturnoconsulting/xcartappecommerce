@@ -34,25 +34,11 @@ const Favourite = () => {
     }
   }, [ids]);
 
-  console.log("ids" , ids);
-
-  if (favouriteProducts.length === 0) {
-    return (
-      <View style={styles.container}>
-        <CustomText
-          lineHeight={20}
-          size={16}
-          style={styles.emptyList}
-          color="rgba(0, 0, 0, 0.7)"
-          text="Non hai aggiunto prodotti preferiti"
-        />
-      </View>
-    );
-  }
+  console.log("favouriteProducts", favouriteProducts.length);
 
   return (
     <View style={styles.container}>
-      {favouriteProducts.length > 0 && (
+      {favouriteProducts.length > 0 ? (
         <FlatList
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -73,8 +59,17 @@ const Favourite = () => {
             )
           }
         />
-      )
-      }
+      ) : (
+        <View style={styles.emptyContainer}>
+          <CustomText
+            lineHeight={20}
+            size={16}
+            style={styles.emptyList}
+            color="rgba(0, 0, 0, 0.7)"
+            text="Non ci sono preferiti"
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -94,9 +89,14 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
   },
-  emptyList: {
-    marginHorizontal: 24,
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
     marginTop: 20,
+  },
+  emptyList: {
+    color: "rgba(0, 0, 0, 0.7)",
+    marginHorizontal: 24,
     textAlign: "center",
   },
 });

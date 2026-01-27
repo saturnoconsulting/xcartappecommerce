@@ -3,9 +3,7 @@ import {
   Modal,
   View,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import CheckoutWeb from "./CheckoutWeb";
 import { GET_USER } from "../store/selectors/userSelector";
@@ -39,7 +37,7 @@ export const ModalComponent = ({
 const renderFormContent = () => (
   fromOrderDetails ? (
     <ReturnsModal
-     onClose={onClose} 
+     onClose={onClose}  
      orderDetails={orderDetails}
      />
   ) : (
@@ -66,9 +64,6 @@ const renderFormContent = () => (
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Icon name="close" size={35} color="black" />
-          </TouchableOpacity>
           {renderFormContent()}
         </View>
       </View>

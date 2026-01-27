@@ -1,17 +1,17 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 
-const CustomText = ({ children, style, ...props }) => {
+const CustomText = ({ children, text, style, ...props }) => {
   return (
     <Text {...props} style={[styles.text, style]}>
-      {children}
+      {text || children}
     </Text>
   );
 };
 
 const styles = StyleSheet.create({
   text: {
-    fontFamily: 'Roboto_400Regular', // o 'Roboto_700Bold'
+    fontFamily: 'Roboto_400Regular', 
   },
 });
 

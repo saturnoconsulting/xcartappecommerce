@@ -63,7 +63,6 @@ const Returns = ({ navigation }) => {
     setModalVisible(false);
   };
 
-
   const resetFilters = () => {
     setSelectedStatus(null);
     setParams({});
@@ -206,8 +205,6 @@ const styles = StyleSheet.create({
     borderColor: primaryColor,
     backgroundColor: "#e6f0ff",
   },
-
-
   container: {
     flex: 1,
     backgroundColor: backgroundcolor,

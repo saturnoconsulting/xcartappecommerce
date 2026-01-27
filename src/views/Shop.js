@@ -8,7 +8,6 @@ import { backgroundcolor, primaryColor } from '../constants/colors';
 import useCategories from '../hooks/useCategories';
 import CategoryRow from '../components/CategoryRow';
 import CustomText from '../components/atoms/CustomText';
-import { useNavigation } from '@react-navigation/native';
 
 export default function Shop() {
   const [loading, setLoading] = useState(false);
@@ -43,9 +42,9 @@ export default function Shop() {
           contentContainerStyle={{ flexGrow: 1 }}
           onEndReachedThreshold={0.5}
         />
-        {/*} <TouchableOpacity style={styles.subscriptionButton} onPress={handleSubs}>
-  <CustomText style={styles.subscriptionButtonText}>Abbonamenti</CustomText>
-</TouchableOpacity>*/}
+        {/*}<TouchableOpacity style={styles.subscriptionButton} onPress={handleSubs}>
+            <CustomText style={styles.subscriptionButtonText}>Abbonamenti</CustomText>
+            </TouchableOpacity>*/}
       </View>
     </>
   );

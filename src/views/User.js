@@ -7,6 +7,7 @@ import CustomText from '../components/atoms/CustomText';
 import { logout } from '../api/user';
 import { backgroundcolor, primaryColor } from '../constants/colors';
 import Separator from '../components/atoms/Separator';
+import { xEventsWidget, xEventsWidgetSubscriptions, xEventsWidgetTickets } from '../utils/brandConstants';
 
 const User = () => {
   const navigation = useNavigation();
@@ -60,6 +61,24 @@ const User = () => {
 
         <Separator />
 
+        {xEventsWidget && xEventsWidgetSubscriptions && (
+          <>
+            <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
+              <CustomText style={styles.menuText}>Abbonamenti</CustomText>
+            </TouchableOpacity>
+            <Separator />
+          </>
+        )}
+
+        {xEventsWidgetTickets && (
+          <>
+            <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
+              <CustomText style={styles.menuText}>Biglietti</CustomText>
+            </TouchableOpacity>
+            <Separator />
+          </>
+        )}
+
         <TouchableOpacity
           style={styles.menuItem}
           onPress={() => goToHomeStack('Orders')}
@@ -104,6 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: backgroundcolor,
   },
   menuItem: {
+    marginTop: 10,
     backgroundColor: backgroundcolor,
     padding: 16,
     borderRadius: 8,

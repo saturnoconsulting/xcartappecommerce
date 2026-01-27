@@ -83,6 +83,15 @@ api.interceptors.response.use(
         errorMessage = "Accesso negato.";
         break;
       case 404:
+        // Debug: stampa quale endpoint ha restituito 404
+        const fullUrl = originalRequest.url || error.config?.url || 'URL sconosciuto';
+        const method = originalRequest.method || error.config?.method || 'METHOD sconosciuto';
+        console.log('🔴 [DEBUG 404] Endpoint che ha restituito 404:');
+        console.log('   URL completo:', fullUrl);
+        console.log('   Metodo:', method.toUpperCase());
+        console.log('   Base URL:', API_URL);
+        console.log('   Endpoint relativo:', fullUrl.replace(API_URL, ''));
+        
         //Se è la rotta del carrello, non mostrare messaggio
         if (originalRequest.url.includes(endpoints.getCart)) {
           // Silenzioso per /getCart
@@ -129,7 +138,7 @@ export const refreshAccessToken = async () => {
   }
 };
 
-// 🔧 Funzione di logout forzato
+// Funzione di logout forzato
 export const forceLogout = async () => {
   console.log("Forzatura logout...");
   await SecureStore.deleteItemAsync('user_token');
