@@ -19,11 +19,9 @@ import { backgroundcolor } from '../constants/colors';
 import NewsHome from '../components/NewsHome';
 import ManualCarousel from '../components/Carousel';
 import DashboardHeader from '../components/DashboardHeader';
-import CategoriesBox from '../components/CategoriesBox';
-import FoodCategoriesSection from '../components/FoodCategoriesSection';
-import { activityType, xEventsWidget } from '../utils/brandConstants';
+// Import condizionali tramite widgetLoader per escludere componenti non utilizzati dal bundle
+import { getWidgetComponent, isWidgetActive, xEventsWidget, activityType } from '../utils/widgetLoader';
 import { getSubActive } from '../api/subs';
-import BoxMatches from '../components/BoxMatches';
 
 
 const Dashboard = () => {
@@ -85,8 +83,6 @@ const Dashboard = () => {
   }, [cartData]);
 
 
-
-
   useEffect(() => {
     refreshPosts();
     refreshProducts();
@@ -140,6 +136,11 @@ const Dashboard = () => {
     const isFood = activityType === 'food';
     const isXEventsWidget = xEventsWidget;
 
+    // Carica i componenti widget solo se attivi (lazy loading)
+    const FoodCategoriesSection = getWidgetComponent('FoodCategoriesSection');
+    const CategoriesBox = getWidgetComponent('CategoriesBox');
+    const BoxMatches = getWidgetComponent('BoxMatches');
+
     return (
       <View style={{ flex: 1, maxWidth: width }}>
         {isFood ? (
@@ -156,11 +157,11 @@ const Dashboard = () => {
         )}
 
         {isFood ? (
-          <FoodCategoriesSection />
+          FoodCategoriesSection && <FoodCategoriesSection />
         ) : (
-          <CategoriesBox categories={cats} loading={loadingCategories} />
+          CategoriesBox && <CategoriesBox categories={cats} loading={loadingCategories} />
         )}
-        {isXEventsWidget && (
+        {isXEventsWidget && BoxMatches && (
          <BoxMatches subActive={subActive} />
         )}
 

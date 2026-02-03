@@ -35,3 +35,4 @@ export const games = "events";
 export const tags = "tags";
 export const subactive = "subscriptions/active";
 export const subscriptions = "subscriptions";
+export const automation = "sensors/data";

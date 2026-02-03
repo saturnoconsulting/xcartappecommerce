@@ -55,9 +55,6 @@ export const primaryColor = currentBrandConstants.colors.primaryColor;
 export const backgroundcolor = currentBrandConstants.colors.backgroundcolor;
 export const secondaryColor = currentBrandConstants.colors.secondaryColor;
 
-// Endpoints sono ora globali in src/constants/endpoints.js
-// Non vengono più esportati da qui per evitare duplicazioni
-
 // Tag styles
 export const tagsStyles = currentBrandConstants.tagstyle.tagsStyles;
 export const tagsStylesPlayer = currentBrandConstants.tagstyle.tagsStylesPlayer;
@@ -77,3 +74,5 @@ export const xEventsWidgetLive = currentBrandConstants.appConfig?.xEventsWidgetL
 export const xEventsWidgetTickets = currentBrandConstants.appConfig?.xEventsWidgetTickets || false;
 //WIDGET SUBSCRIPTIONS (true o false)
 export const xEventsWidgetSubscriptions = currentBrandConstants.appConfig?.xEventsWidgetSubscriptions || false;
+//WIDGET DOMOTICA (true o false)
+export const xLivingWidget = currentBrandConstants.appConfig?.xLivingWidget || false;

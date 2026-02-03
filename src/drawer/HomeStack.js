@@ -8,12 +8,16 @@ import { backgroundcolor, primaryColor } from '../constants/colors';
 import { CardStyleInterpolators } from '@react-navigation/stack';
 import PostsDetails from '../views/PostsDetails';
 import ProductDetails from '../views/ProductDetails';
-import MatchesVOD from '../views/MatchesVOD';
-import VideoMatchLive from '../views/VideoMatchLive';
+// Import condizionali tramite widgetLoader per escludere screen non utilizzate dal bundle
+import { getWidgetScreen, isWidgetActive } from '../utils/widgetLoader';
 
 const Stack = createStackNavigator();
 
 export default function HomeStack() {
+  // Carica le screen widget solo se attive (lazy loading)
+  const MatchesVOD = getWidgetScreen('MatchesVOD');
+  const VideoMatchLive = getWidgetScreen('VideoMatchLive');
+
   return (
     <Stack.Navigator screenOptions={{
       animationEnabled: true,
@@ -33,18 +37,22 @@ export default function HomeStack() {
           headerStyle: { backgroundColor: backgroundcolor },
           headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
         })}/>
-      <Stack.Screen name="MatchesVOD" component={MatchesVOD} options={{ 
+      {MatchesVOD && (
+        <Stack.Screen name="MatchesVOD" component={MatchesVOD} options={{ 
           headerShown: true, 
           title: "Eventi", 
           headerStyle: { backgroundColor: backgroundcolor }, 
           headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
         }} />
-      <Stack.Screen name="VideoMatchLive" component={VideoMatchLive} options={{ 
+      )}
+      {VideoMatchLive && (
+        <Stack.Screen name="VideoMatchLive" component={VideoMatchLive} options={{ 
           headerShown: true, 
           title: "Ora in Diretta", 
           headerStyle: { backgroundColor: backgroundcolor }, 
           headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
         }} />
+      )}
         </Stack.Navigator>
   );
 }

@@ -11,11 +11,17 @@ import UserDetailsRecap from '../views/UserDetailsRecap';
 import Returns from '../views/Returns';
 import ReturnsDetails from '../views/ReturnsDetails';
 import ProductDetails from '../views/ProductDetails';
-import Subscriptions from '../views/Subscriptions';
+import RoomDevices from '../views/RoomDevices';
+// Import condizionali tramite widgetLoader per escludere screen non utilizzate dal bundle
+import { getWidgetScreen } from '../utils/widgetLoader';
 
 const Stack = createStackNavigator();
 
 export default function UserStack() {
+  // Carica le screen widget solo se attive (lazy loading)
+  const Subscriptions = getWidgetScreen('Subscriptions');
+  const Automation = getWidgetScreen('Automation');
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -101,13 +107,35 @@ export default function UserStack() {
           headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
         }}
       />
-       <Stack.Screen
-        name="Subscriptions"
-        component={Subscriptions}
-        options={{
-          title: "I tuoi abbonamenti",
-          headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
-        }}
+      {Subscriptions && (
+        <Stack.Screen
+          name="Subscriptions"
+          component={Subscriptions}
+          options={{
+            title: "I tuoi abbonamenti",
+            headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
+          }}
+        />
+      )}
+      {Automation && (
+        <Stack.Screen
+          name="Automation"
+          component={Automation}
+          options={{
+            headerShown: true,
+            title: "Domotica",
+            headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
+          }}
+        />
+      )}
+      <Stack.Screen
+        name="RoomDevices"
+        component={RoomDevices}
+        options={({ route }) => ({
+          headerShown: true,
+          title: route.params?.roomName || "Dispositivi",
+          headerLeft: () => <CustomBackButton />,
+        })}
       />
     </Stack.Navigator>
   );

@@ -7,7 +7,8 @@ import CustomText from '../components/atoms/CustomText';
 import { logout } from '../api/user';
 import { backgroundcolor, primaryColor } from '../constants/colors';
 import Separator from '../components/atoms/Separator';
-import { xEventsWidget, xEventsWidgetSubscriptions, xEventsWidgetTickets } from '../utils/brandConstants';
+import { xEventsWidget, xEventsWidgetSubscriptions, xEventsWidgetTickets, xLivingWidget } from '../utils/brandConstants';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const User = () => {
   const navigation = useNavigation();
@@ -42,69 +43,84 @@ const User = () => {
 
       <CustomText style={styles.titleSection}>Area Utente</CustomText>
 
-      <View style={styles.menuContainer}>
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => goToHomeStack('UserDetailsRecap')}
-        >
-          <CustomText style={styles.menuText}>Profilo</CustomText>
-        </TouchableOpacity>
-
-        <Separator />
-
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => goToHomeStack('Favorite')}
-        >
-          <CustomText style={styles.menuText}>Preferiti</CustomText>
-        </TouchableOpacity>
-
-        <Separator />
-
-        {xEventsWidget && xEventsWidgetSubscriptions && (
-          <>
-            <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
-              <CustomText style={styles.menuText}>Abbonamenti</CustomText>
-            </TouchableOpacity>
-            <Separator />
-          </>
-        )}
-
-        {xEventsWidgetTickets && (
-          <>
-            <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
-              <CustomText style={styles.menuText}>Biglietti</CustomText>
-            </TouchableOpacity>
-            <Separator />
-          </>
-        )}
-
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => goToHomeStack('Orders')}
-        >
-          <CustomText style={styles.menuText}>Ordini</CustomText>
-        </TouchableOpacity>
-
-        <Separator />
-
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => goToHomeStack('Returns')}
-        >
-          <CustomText style={styles.menuText}>Resi</CustomText>
-
-        </TouchableOpacity>
-
-        <Separator />
-
-        <View style={styles.logoutSection}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Icon name="log-out-outline" size={22} color="white" />
-            <Text style={styles.logoutText}>Logout</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
+        <View style={styles.menuContainer}>
+          
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => goToHomeStack('UserDetailsRecap')}
+          >
+            <CustomText style={styles.menuText}>Profilo</CustomText>
           </TouchableOpacity>
+
+          <Separator />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => goToHomeStack('Orders')}
+          >
+            <CustomText style={styles.menuText}>Ordini</CustomText>
+          </TouchableOpacity>
+
+          <Separator />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => goToHomeStack('Returns')}
+          >
+            <CustomText style={styles.menuText}>Resi</CustomText>
+
+          </TouchableOpacity>
+
+          <Separator />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => goToHomeStack('Favorite')}
+          >
+            <CustomText style={styles.menuText}>Preferiti</CustomText>
+          </TouchableOpacity>
+
+          {xEventsWidget && xEventsWidgetSubscriptions && (
+            <>
+            <Separator />
+              <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
+                <CustomText style={styles.menuText}>Abbonamenti</CustomText>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {xEventsWidgetTickets && (
+            <>
+              <Separator />
+              <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
+                <CustomText style={styles.menuText}>Biglietti</CustomText>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {xLivingWidget && (
+            <>
+            <Separator />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => goToHomeStack('Automation')}
+            >
+              <CustomText style={styles.menuText}>Domotica</CustomText>
+            </TouchableOpacity>
+          </>
+        )}
+
+          <Separator />
+
+          <View style={styles.logoutSection}>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Icon name="log-out-outline" size={22} color="white" />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
