@@ -19,7 +19,13 @@ const brandConstants = {
     tagstyle: require('../../brands/xcart/constants/tagstyle'),
     countries: require('../../brands/xcart/constants/countries'),
     appConfig: require('../../brands/xcart/constants/appConfig'),
+  },  gunpowder: {
+    colors: require('../../brands/gunpowder/constants/colors'),
+    tagstyle: require('../../brands/gunpowder/constants/tagstyle'),
+    countries: require('../../brands/gunpowder/constants/countries'),
+    appConfig: require('../../brands/gunpowder/constants/appConfig'),
   },
+
 };
 
 /**
@@ -76,3 +82,7 @@ export const xEventsWidgetTickets = currentBrandConstants.appConfig?.xEventsWidg
 export const xEventsWidgetSubscriptions = currentBrandConstants.appConfig?.xEventsWidgetSubscriptions || false;
 //WIDGET DOMOTICA (true o false)
 export const xLivingWidget = currentBrandConstants.appConfig?.xLivingWidget || false;
+//MODALITÀ APP ('standard' o 'domotica')
+export const appMode = currentBrandConstants.appConfig?.appMode || 'standard';
+//ABILITA ECOMMERCE NELLA MODALITÀ DOMOTICA (true o false)
+export const enableEcommerce = currentBrandConstants.appConfig?.enableEcommerce || false;

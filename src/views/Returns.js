@@ -81,7 +81,7 @@ const Returns = ({ navigation }) => {
         {returns.length > 0 ? (
           <FlatList
             data={returns}
-            keyExtractor={(item) => item.idreturnorder.toString()}
+            keyExtractor={(item, index) => `${item.idreturnorder}-${index}`}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.returnItem}

@@ -14,7 +14,7 @@ const QRCodeModal = ({ visible, onClose, subscription }) => {
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Icon name="close" size={24} color="#333" />
           </TouchableOpacity>
-          <CustomText style={styles.title}>Accesso allo stadio </CustomText>
+          <CustomText style={styles.title}> Accesso </CustomText>
           <Image
             source={{ uri: qrCodeValue }}
             style={{ width: 200, height: 200 }}

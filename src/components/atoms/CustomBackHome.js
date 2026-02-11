@@ -4,20 +4,38 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { primaryColor } from "../../constants/colors";
 
-const CustomBackButton = ({ color }) => {
+const CustomBackButton = ({ color, targetScreen, previousScreen }) => {
     const navigation = useNavigation();
     const route = useRoute();
 
     const handleBack = () => {
-        const sourceScreen = route.params?.sourceScreen;
+        // Priorità 1: Se è specificato un targetScreen, naviga direttamente lì
+        if (targetScreen) {
+            navigation.navigate(targetScreen);
+            return;
+        }
 
+        // Priorità 2: Se è specificato un previousScreen, naviga lì
+        if (previousScreen) {
+            navigation.navigate(previousScreen);
+            return;
+        }
+
+        // Priorità 3: Controlla se c'è un sourceScreen nei route params
+        const sourceScreen = route.params?.sourceScreen;
         if (sourceScreen) {
             navigation.navigate(sourceScreen);
-        } else if (navigation.canGoBack()) {
-            navigation.goBack();
-        } else {
-            navigation.navigate("Dashboard");
+            return;
         }
+
+        // Priorità 4: Usa goBack() se possibile
+        if (navigation.canGoBack()) {
+            navigation.goBack();
+            return;
+        }
+
+        // Fallback: naviga a Dashboard
+        navigation.navigate("Dashboard");
     };
 
     return (

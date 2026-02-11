@@ -94,7 +94,7 @@ export default function CategoryShop() {
     }
   }, [idcat, categoryType, searchQuery, setParams, setPage]);
 
-  console.log("prods category shop", prods);
+  //console.log("prods category shop", prods);
 
   return (
     <SafeAreaView style={styles.safeArea}>

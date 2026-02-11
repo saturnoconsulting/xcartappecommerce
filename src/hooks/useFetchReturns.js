@@ -33,9 +33,17 @@ const useFetchReturns = (params) => {
           const newReturns = response.data.returns;
           setTotalCount(response.data.totalcount || 0);
 
-          setReturns(prev =>
-            isRefresh || nextPage === 1 ? newReturns : [...prev, ...newReturns]
-          );
+          setReturns(prev => {
+            if (isRefresh || nextPage === 1) {
+              return newReturns;
+            }
+            // Deduplicate: filter out items that already exist based on idreturnorder
+            const existingIds = new Set(prev.map(item => item.idreturnorder));
+            const uniqueNewReturns = newReturns.filter(
+              item => !existingIds.has(item.idreturnorder)
+            );
+            return [...prev, ...uniqueNewReturns];
+          });
         }
 
       } finally {

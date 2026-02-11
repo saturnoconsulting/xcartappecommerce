@@ -1,0 +1,30 @@
+{
+  "name": "Gunpowder",
+  "slug": "gunpowder",
+  "displayName": "Gunpowder",
+  "icon": "./brands/gunpowder/assets/icon.png",
+  "adaptiveIcon": "./brands/gunpowder/assets/adaptive-icon.png",
+  "splashImage": "./brands/gunpowder/assets/splash.png",
+  "splashBackgroundColor": "#000000",
+  "favicon": "./brands/gunpowder/assets/favicon.png",
+  "notificationIcon": "./brands/gunpowder/assets/notification-icon.png",
+  "apiUrl": null,
+  "licenseKey": null,
+  "idsalespointkey": null,
+  "ios": {
+    "bundleIdentifier": "com.yourcompany.gunpowder",
+    "buildNumber": "1"
+  },
+  "android": {
+    "package": "com.yourcompany.gunpowder",
+    "versionCode": 1,
+    "googleServicesFile": "./brands/gunpowder/google-services.json"
+  },
+  "eas": {
+    "projectId": "your-project-id-here"
+  },
+  "runtimeVersion": "1.0.0",
+  "updates": {
+    "url": "https://u.expo.dev/your-project-id-here"
+  }
+}

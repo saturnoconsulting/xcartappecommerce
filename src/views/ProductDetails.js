@@ -30,8 +30,6 @@ import { addFavorite, removeFavorite } from "../store/actions/favoriteActions";
 import { normalizeImages } from "../utils/images";
 
 
-
-
 const ProductDetails = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -76,11 +74,22 @@ const ProductDetails = () => {
   } else {
     if (stocks && stocks[0]) {
       const stockData = stocks[0];
-      if (stockData?.variants) {
-        const variantStock = stockData.variants.find(
-          (v) => v.externalid === variantId
-        );
-        qtyRemaining = variantStock ? variantStock.qnt : 0;
+      if (stockData?.variants && variantId) {
+        // Per prodotti multivariant, cerca la variante selezionata usando l'ID MongoDB
+        const selectedVariant = product.variants.find((v) => v.externalid === variantId);
+        if (selectedVariant) {
+          const variantIdMongo = selectedVariant._id?.$oid || selectedVariant._id;
+          const variantStock = stockData.variants.find(
+            (stockVar) => {
+              const stockVariantIdMongo = stockVar.idvariant?.$oid || stockVar.idvariant;
+              return String(variantIdMongo) === String(stockVariantIdMongo);
+            }
+          );
+          qtyRemaining = variantStock ? variantStock.qnt : 0;
+        }
+      } else if (stockData?.variants && !variantId && product.multivariant) {
+        // Se multivariant ma nessuna variante selezionata, mostra 0
+        qtyRemaining = 0;
       } else if (stockData?.compounds) {
         qtyRemaining = stockData.compounds.reduce(
           (min, c) => Math.min(min, c.quantity),
@@ -259,23 +268,21 @@ const ProductDetails = () => {
             <CustomText style={styles.variantTitle}>Seleziona taglia:</CustomText>
             <View style={styles.variantsRow}>
               {product.variants.map((v) => {
+                // Match tra variante prodotto e variante stock usando l'ID MongoDB
+                const variantIdMongo = v._id?.$oid || v._id;
                 const variant = stocks?.[0]?.variants?.find(
-                  (stockVar) => stockVar.externalid === v.externalid
+                  (stockVar) => {
+                    const stockVariantIdMongo = stockVar.idvariant?.$oid || stockVar.idvariant;
+                    return String(variantIdMongo) === String(stockVariantIdMongo);
+                  }
                 );
-                const isOutOfStock = variant?.qnt <= 0;
+                const isOutOfStock = !variant || variant.qnt <= 0;
                 const isSelected = variantId === v.externalid;
-
                 return (
                   <TouchableOpacity
-                    key={v.externalid}
-                    style={[
-                      styles.variantBox,
-                      isSelected && styles.variantBoxSelected,
-                      isOutOfStock && styles.variantBoxDisabled,
-                    ]}
-                    onPress={() => {
-                      if (!isOutOfStock) setVariantId(v.externalid);
-                    }}
+                    key={v.externalid} 
+                    style={[styles.variantBox, isSelected && styles.variantBoxSelected, isOutOfStock && styles.variantBoxDisabled]}
+                    onPress={() => setVariantId(v.externalid)}
                     disabled={isOutOfStock}
                   >
                     <CustomText

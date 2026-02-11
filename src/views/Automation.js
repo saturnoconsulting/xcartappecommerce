@@ -17,33 +17,6 @@ const Automation = () => {
     const { automation, loading: automationLoading, refetch } = useFetchAutomation({});
     const navigation = useNavigation();
 
-    // Funzione per convertire i dati API nella struttura per stanza
-    const convertAutomationToRoomStructure = (automationArray) => {
-    
-        if (!automationArray) {
-            return {};
-        }
-        // Se i dati arrivano già nella struttura corretta, restituiscili così
-        if (typeof automationArray === 'object' && !Array.isArray(automationArray)) {
-            return automationArray;
-        }
-        // Altrimenti, raggruppa per stanza se c'è una proprietà room
-        const rooms = {};
-        if (Array.isArray(automationArray)) {
-            automationArray.forEach(device => {
-                const roomName = device.room || 'Altro';
-                if (!rooms[roomName]) {
-                    rooms[roomName] = [];
-                }
-                rooms[roomName].push(device);
-            });
-        }
-        return rooms;
-    };
-
-    // Usa i dati reali se disponibili, altrimenti usa il JSON di esempio
-    const automationData = convertAutomationToRoomStructure(automation)
-  
     const handleRoomPress = (roomName, devices) => {
         navigation.navigate('RoomDevices', {
             roomName,
@@ -52,7 +25,7 @@ const Automation = () => {
         });
     };
 
-    if (!automationLoading && (!automationData || Object.keys(automationData).length === 0)) {
+    if (!automationLoading && (!automation || Object.keys(automation).length === 0)) {
         return (
             <View style={styles.container}>
                 <CustomText style={styles.subtitle}>
@@ -107,15 +80,15 @@ const Automation = () => {
                     <RefreshControl refreshing={automationLoading} onRefresh={refetch} />
                 }
             >
-                <CustomText style={styles.title}>Domotica</CustomText>
+                {/*<CustomText style={styles.title}>Domotica</CustomText>*/}
 
                 {automationLoading && (
                     <ActivityIndicator size="large" color={primaryColor} style={{ marginTop: 20 }} />
                 )}
 
-                {!automationLoading && automationData  && (
+                {!automationLoading && automation  && (
                     <View style={styles.roomsList}>
-                        {Object.entries(automationData).map(([roomName, devices]) =>
+                        {Object.entries(automation).map(([roomName, devices]) =>
                             renderRoom(roomName, devices)
                         )}
                     </View>

@@ -12,6 +12,7 @@ import Returns from '../views/Returns';
 import ReturnsDetails from '../views/ReturnsDetails';
 import ProductDetails from '../views/ProductDetails';
 import RoomDevices from '../views/RoomDevices';
+import Badges from '../views/Badges';
 // Import condizionali tramite widgetLoader per escludere screen non utilizzate dal bundle
 import { getWidgetScreen } from '../utils/widgetLoader';
 
@@ -136,6 +137,15 @@ export default function UserStack() {
           title: route.params?.roomName || "Dispositivi",
           headerLeft: () => <CustomBackButton />,
         })}
+      />
+      <Stack.Screen
+        name="Badges"
+        component={Badges}
+        options={{
+          headerShown: true,
+          title: "Badge",
+          headerLeft: () => <CustomBackButton targetScreen="UserHome" />,
+        }}
       />
     </Stack.Navigator>
   );

@@ -7,7 +7,7 @@ import CustomText from '../components/atoms/CustomText';
 import { logout } from '../api/user';
 import { backgroundcolor, primaryColor } from '../constants/colors';
 import Separator from '../components/atoms/Separator';
-import { xEventsWidget, xEventsWidgetSubscriptions, xEventsWidgetTickets, xLivingWidget } from '../utils/brandConstants';
+import { activityType, appMode, enableEcommerce, xEventsWidget, xEventsWidgetSubscriptions, xEventsWidgetTickets, xLivingWidget } from '../utils/brandConstants';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const User = () => {
@@ -45,7 +45,7 @@ const User = () => {
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
         <View style={styles.menuContainer}>
-          
+
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => goToHomeStack('UserDetailsRecap')}
@@ -53,37 +53,40 @@ const User = () => {
             <CustomText style={styles.menuText}>Profilo</CustomText>
           </TouchableOpacity>
 
-          <Separator />
+          {(enableEcommerce || appMode === 'standard') && (
+            <>
+              <Separator />
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => goToHomeStack('Orders')}
+              >
+                <CustomText style={styles.menuText}>Ordini</CustomText>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => goToHomeStack('Orders')}
-          >
-            <CustomText style={styles.menuText}>Ordini</CustomText>
-          </TouchableOpacity>
+              <Separator />
 
-          <Separator />
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => goToHomeStack('Returns')}
+              >
+                <CustomText style={styles.menuText}>Resi</CustomText>
 
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => goToHomeStack('Returns')}
-          >
-            <CustomText style={styles.menuText}>Resi</CustomText>
+              </TouchableOpacity>
 
-          </TouchableOpacity>
+              <Separator />
 
-          <Separator />
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => goToHomeStack('Favorite')}
-          >
-            <CustomText style={styles.menuText}>Preferiti</CustomText>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => goToHomeStack('Favorite')}
+              >
+                <CustomText style={styles.menuText}>Preferiti</CustomText>
+              </TouchableOpacity>
+            </>
+          )}
 
           {xEventsWidget && xEventsWidgetSubscriptions && (
             <>
-            <Separator />
+              <Separator />
               <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Subscriptions')}>
                 <CustomText style={styles.menuText}>Abbonamenti</CustomText>
               </TouchableOpacity>
@@ -101,16 +104,21 @@ const User = () => {
 
           {xLivingWidget && (
             <>
-            <Separator />
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => goToHomeStack('Automation')}
-            >
-              <CustomText style={styles.menuText}>Domotica</CustomText>
-            </TouchableOpacity>
-          </>
-        )}
+              <Separator />
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => goToHomeStack('Automation')}
+              >
+                <CustomText style={styles.menuText}>Domotica</CustomText>
+              </TouchableOpacity>
 
+              <Separator />
+
+              <TouchableOpacity style={styles.menuItem} onPress={() => goToHomeStack('Badges')}>
+                <CustomText style={styles.menuText}>Badge</CustomText>
+              </TouchableOpacity>
+            </>
+          )}
           <Separator />
 
           <View style={styles.logoutSection}>

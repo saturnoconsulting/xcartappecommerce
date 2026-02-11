@@ -6,8 +6,10 @@
   "scripts": {
     "start": "expo start",
     "start:brand": "BRAND=${BRAND:-xcart} expo start",
+    "start:localhost": "expo start --localhost",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios:localhost": "expo start --localhost --ios",
     "web": "expo start --web",
     "build:prod": "eas build --platform android --profile production --no-wait",
     "build:dev": "eas build --profile development --platform android --no-wait",

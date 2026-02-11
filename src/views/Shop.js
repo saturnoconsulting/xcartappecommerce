@@ -3,13 +3,16 @@ import {
   Text, View, StyleSheet, SafeAreaView, Modal, FlatList, TextInput,
   TouchableOpacity, RefreshControl
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Loading from '../components/Loading';
 import { backgroundcolor, primaryColor } from '../constants/colors';
 import useCategories from '../hooks/useCategories';
 import CategoryRow from '../components/CategoryRow';
 import CustomText from '../components/atoms/CustomText';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function Shop() {
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [params, setParams] = useState({});
 
@@ -21,11 +24,20 @@ export default function Shop() {
     params,
   });
 
+  const handleSearch = () => {
+    navigation.navigate('Search');
+  };
+
   return (
     <>
       <View style={styles.container}>
         {loading && <Loading />}
-        <CustomText style={[styles.title, { backgroundColor: backgroundcolor }]}>Shop</CustomText>
+        <View style={styles.searchContainer}>
+          <CustomText style={[styles.title, { backgroundColor: backgroundcolor }]}>Shop</CustomText>
+          <TouchableOpacity onPress={handleSearch} style={styles.searchIconContainer}>
+            <Icon name="search-outline" color={primaryColor} size={28} />
+          </TouchableOpacity>
+        </View>
         <FlatList
           style={{ backgroundColor: backgroundcolor }}
           data={cats}
@@ -156,5 +168,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: backgroundcolor,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 15,
+  },
+  searchIconContainer: {
+    padding: 8,
   },
 });

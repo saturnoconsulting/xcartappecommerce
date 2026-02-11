@@ -16,7 +16,11 @@ const brandAssets = {
   xcart: {
     logoWhite: require('../../brands/xcart/assets/xcartlogowhite.png'),
     logoBlack: require('../../brands/xcart/assets/xcartlogoblack.png'),
+  },  gunpowder: {
+    logoWhite: require('../../brands/gunpowder/assets/logowhite.png'),
+    logoBlack: require('../../brands/gunpowder/assets/logoblack.png'),
   },
+
 };
 
 /**

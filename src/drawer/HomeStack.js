@@ -10,6 +10,7 @@ import PostsDetails from '../views/PostsDetails';
 import ProductDetails from '../views/ProductDetails';
 // Import condizionali tramite widgetLoader per escludere screen non utilizzate dal bundle
 import { getWidgetScreen, isWidgetActive } from '../utils/widgetLoader';
+import Badges from '../views/Badges';
 
 const Stack = createStackNavigator();
 
@@ -28,31 +29,40 @@ export default function HomeStack() {
     }}>
       <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
       <Stack.Screen name="Cart" component={Cart} options={{ headerShown: false }} />
-     <Stack.Screen name="Posts" component={Posts} options={{ headerShown: false }} />
+      <Stack.Screen name="Posts" component={Posts} options={{ headerShown: false }} />
       <Stack.Screen name="User" component={User} options={{ headerShown: false }} />
-       <Stack.Screen name="PostsDetails" component={PostsDetails} options={{ headerShown: true, title: "", headerStyle: { backgroundColor: backgroundcolor }, headerLeft: () => <CustomBackButton targetScreen="Shop" /> }} />
+      <Stack.Screen name="PostsDetails" component={PostsDetails} options={{ headerShown: true, title: "", headerStyle: { backgroundColor: backgroundcolor }, headerLeft: () => <CustomBackButton targetScreen="Shop" /> }} />
       <Stack.Screen name="ProductDetails" component={ProductDetails} options={({ route }) => ({
-          headerShown: true,
-          title: "Dettaglio",
-          headerStyle: { backgroundColor: backgroundcolor },
-          headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
-        })}/>
+        headerShown: true,
+        title: "Dettaglio",
+        headerStyle: { backgroundColor: backgroundcolor },
+        headerLeft: () => <CustomBackButton previousScreen={route.params?.previousScreen || "Shop"} />
+      })} />
       {MatchesVOD && (
-        <Stack.Screen name="MatchesVOD" component={MatchesVOD} options={{ 
-          headerShown: true, 
-          title: "Eventi", 
-          headerStyle: { backgroundColor: backgroundcolor }, 
-          headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
+        <Stack.Screen name="MatchesVOD" component={MatchesVOD} options={{
+          headerShown: true,
+          title: "Eventi",
+          headerStyle: { backgroundColor: backgroundcolor },
+          headerLeft: () => <CustomBackButton targetScreen="Dashboard" />
         }} />
       )}
+      <Stack.Screen
+        name="Badges"
+        component={Badges}
+        options={{
+          headerShown: true,
+          title: "Badge",
+          headerLeft: () => <CustomBackButton targetScreen="Dashboard" />,
+        }}
+      />
       {VideoMatchLive && (
-        <Stack.Screen name="VideoMatchLive" component={VideoMatchLive} options={{ 
-          headerShown: true, 
-          title: "Ora in Diretta", 
-          headerStyle: { backgroundColor: backgroundcolor }, 
-          headerLeft: () => <CustomBackButton targetScreen="Dashboard" /> 
+        <Stack.Screen name="VideoMatchLive" component={VideoMatchLive} options={{
+          headerShown: true,
+          title: "Ora in Diretta",
+          headerStyle: { backgroundColor: backgroundcolor },
+          headerLeft: () => <CustomBackButton targetScreen="Dashboard" />
         }} />
       )}
-        </Stack.Navigator>
+    </Stack.Navigator>
   );
 }

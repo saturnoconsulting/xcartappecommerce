@@ -24,8 +24,16 @@ export const CartItem = ({ item, refetchCart, qty }) => {
   if (stocks && stocks[0]) {
     const stockData = stocks[0];
     if (stockData?.variants) {
-      const variantStock = stockData.variants.find((v) => v.externalid === item.idVariant);
-      qtyRemaining = variantStock ? variantStock.qnt : 0;
+      // Per prodotti con varianti, cerca la variante corrispondente
+      if (item.idVariant !== null && item.idVariant !== undefined) {
+        const variantStock = stockData.variants.find(
+          (v) => String(v.externalid) === String(item.idVariant)
+        );
+        qtyRemaining = variantStock ? variantStock.qnt : 0;
+      } else {
+        // Se il prodotto ha varianti ma non c'è idVariant, non c'è stock disponibile
+        qtyRemaining = 0;
+      }
     } else if (stockData?.compounds) {
       qtyRemaining = stockData.compounds.reduce((min, c) => Math.min(min, c.quantity), Infinity);
     } else if (stockData?.quantity !== undefined) {
@@ -52,6 +60,14 @@ export const CartItem = ({ item, refetchCart, qty }) => {
 
   const onAdd = async () => {
     if (item.type !== "virtual") {
+      if (qtyRemaining <= 0) {
+        showMessage({
+          message: "Attenzione",
+          description: "Prodotto esaurito",
+          type: "warning",
+        });
+        return;
+      }
       if (quantity >= qtyRemaining) {
         showMessage({
           message: "Attenzione",
@@ -69,6 +85,8 @@ export const CartItem = ({ item, refetchCart, qty }) => {
         idcart: idcart,
       });
       setQuantity((prev) => prev + 1);
+      // Aggiorna lo stock dopo l'aggiunta
+      await refetchStocks();
       refetchCart();
     } catch {
       showMessage({

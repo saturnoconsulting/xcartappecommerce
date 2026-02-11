@@ -20,32 +20,52 @@ const RoomDevices = () => {
     const [updatingRelays, setUpdatingRelays] = useState({});
     const [devices, setDevices] = useState(initialDevices || []);
 
+    // Normalizza il valore booleano da stringa o booleano
+    const normalizeBooleanValue = (value) => {
+        if (typeof value === 'boolean') return value;
+        if (typeof value === 'string') {
+            return value === 'true' || value === '1';
+        }
+        return Boolean(value);
+    };
+
+    const getDeviceKey = (device) => `${device.type}-${device.idreader || device.id}`;
+
     const updateDeviceValue = async (item, newValue) => {
-        const deviceId = item.id;
+        const deviceKey = getDeviceKey(item);
         const idreader = item.idreader || item.id;
         const deviceType = item.type;
 
-        // Aggiorna lo stato locale immediatamente per feedback visivo
-        setUpdatingRelays(prev => ({ ...prev, [deviceId]: true }));
+        // Salva il valore precedente per il rollback in caso di errore
+        const previousValue = item.value;
+
+        // Aggiorna lo stato locale IMMEDIATAMENTE per feedback visivo reattivo
+        setUpdatingRelays(prev => ({ ...prev, [deviceKey]: true }));
+        setDevices(prevDevices => 
+            prevDevices.map(device => 
+                getDeviceKey(device) === deviceKey
+                    ? { ...device, value: newValue }
+                    : device
+            )
+        );
 
         try {
             await updateDevice(deviceType, idreader, newValue);
-            
-            // Aggiorna i dispositivi locali dopo il successo
-            setDevices(prevDevices => 
-                prevDevices.map(device => 
-                    device.id === deviceId 
-                        ? { ...device, value: newValue }
-                        : device
-                )
-            );
-            
             showMessage({
                 message: 'Successo',
                 description: `${item.name} aggiornato con successo`,
                 type: 'success',
             });
         } catch (error) {
+            // Ripristina il valore precedente in caso di errore
+            setDevices(prevDevices => 
+                prevDevices.map(device => 
+                    getDeviceKey(device) === deviceKey
+                        ? { ...device, value: previousValue }
+                        : device
+                )
+            );
+            
             showMessage({
                 message: 'Errore',
                 description: 'Non siamo riusciti ad aggiornare lo stato del dispositivo',
@@ -54,29 +74,28 @@ const RoomDevices = () => {
         } finally {
             setUpdatingRelays(prev => {
                 const newState = { ...prev };
-                delete newState[deviceId];
+                delete newState[deviceKey];
                 return newState;
             });
         }
     };
 
     const toggleSwitch = async (item) => {
-        const newValue = !item.value;
+        const currentValue = normalizeBooleanValue(item.value);
+        const newValue = !currentValue;
         await updateDeviceValue(item, newValue);
     };
 
-    const adjustSensorValue = async (item, increment) => {
+    /*const adjustSensorValue = async (item, increment) => {
         const currentValue = parseFloat(item.value) || 0;
         const step = item.type === 'temperature' ? 0.5 : 1; // 0.5 per temperatura, 1 per umidità
         const newValue = increment ? currentValue + step : currentValue - step;
-        
         // Limiti ragionevoli
         const minValue = item.type === 'temperature' ? -10 : 0;
         const maxValue = item.type === 'temperature' ? 50 : 100;
         const clampedValue = Math.max(minValue, Math.min(maxValue, newValue));
-        
         await updateDeviceValue(item, clampedValue);
-    };
+    };*/
 
     //TODO: Aggiungere icone e colori se aumentano i tipi di dispositivi 
     const getIconName = (type) => {
@@ -107,6 +126,7 @@ const RoomDevices = () => {
 
     const renderDevice = (device, index) => {
         // Normalizza i dati del dispositivo
+        console.log("device", device);
         const normalizedDevice = {
             id: device.id || device.idreader || index,
             type: device.type,
@@ -115,15 +135,20 @@ const RoomDevices = () => {
             unit: device.unit || (device.type === 'temperature' ? '°C' : device.type === 'humidity' ? '%' : ''),
             ...device
         };
-
+        console.log("normalizedDevice", normalizedDevice);
+        // Chiave logica per identificare in modo univoco il dispositivo (tipo + id/idreader)
+        const deviceKey = getDeviceKey(normalizedDevice);
+        // Chiave React (unica) per la lista
+        const uniqueKey = `${deviceKey}-${index}`;
         if (normalizedDevice.type === 'relay') {
-            const isUpdating = updatingRelays[normalizedDevice.id];
-            const iconColor = getIconColor(normalizedDevice.type, normalizedDevice.value);
+            const isUpdating = updatingRelays[deviceKey];
+            const booleanValue = normalizeBooleanValue(normalizedDevice.value);
+            const iconColor = getIconColor(normalizedDevice.type, booleanValue);
             return (
-                <View key={normalizedDevice.id} style={styles.deviceItem}>
+                <View key={uniqueKey} style={styles.deviceItem}>
                     <View style={[
                         styles.toggleBox,
-                        normalizedDevice.value && styles.toggleBoxActive
+                        booleanValue && styles.toggleBoxActive
                     ]}>
                         <View style={styles.toggleContent}>
                             <View style={[
@@ -145,12 +170,12 @@ const RoomDevices = () => {
                                     {normalizedDevice.name}
                                 </CustomText>
                                 <CustomText style={styles.deviceStatus}>
-                                    {normalizedDevice.value ? 'Acceso' : 'Spento'}
+                                    {booleanValue ? 'Acceso' : 'Spento'}
                                 </CustomText>
                             </View>
                         </View>
                         <Switch
-                            value={normalizedDevice.value}
+                            value={booleanValue}
                             onValueChange={() => toggleSwitch(normalizedDevice)}
                             trackColor={{ false: '#E0E0E0', true: primaryColor }}
                             thumbColor="#fff"
@@ -163,9 +188,9 @@ const RoomDevices = () => {
         } else {
             // Temperature o Humidity
             const iconColor = getIconColor(normalizedDevice.type);
-            const isUpdating = updatingRelays[normalizedDevice.id];
+            const isUpdating = updatingRelays[deviceKey];
             return (
-                <View key={normalizedDevice.id} style={styles.deviceItem}>
+                <View key={uniqueKey} style={styles.deviceItem}>
                     <View style={styles.sensorBox}>
                         <View style={styles.sensorHeader}>
                             <View style={[
@@ -190,7 +215,12 @@ const RoomDevices = () => {
                                 </CustomText>
                             </View>
                         </View>
-                        <View style={styles.sensorValueContainer}>
+                        <View style={styles.sensorValueWrapper}>
+                            <CustomText style={[styles.sensorValue, { color: iconColor }]}>
+                                {normalizedDevice.value} {normalizedDevice.unit}
+                            </CustomText>
+                        </View>
+                        {/*<View style={styles.sensorValueContainer}>
                             <TouchableOpacity
                                 style={styles.sensorButton}
                                 onPress={() => adjustSensorValue(normalizedDevice, false)}
@@ -199,11 +229,7 @@ const RoomDevices = () => {
                             >
                                 <Icon name="remove" size={28} color={iconColor} />
                             </TouchableOpacity>
-                            <View style={styles.sensorValueWrapper}>
-                                <CustomText style={[styles.sensorValue, { color: iconColor }]}>
-                                    {normalizedDevice.value} {normalizedDevice.unit}
-                                </CustomText>
-                            </View>
+                          
                             <TouchableOpacity
                                 style={styles.sensorButton}
                                 onPress={() => adjustSensorValue(normalizedDevice, true)}
@@ -212,7 +238,7 @@ const RoomDevices = () => {
                             >
                                 <Icon name="add" size={28} color={iconColor} />
                             </TouchableOpacity>
-                        </View>
+                        </View>*/}
                     </View>
                 </View>
             );
